@@ -14,7 +14,7 @@ public partial class Report : BaseEntity
 
     public int? CategoryId { get; set; }
 
-    public byte Status { get; set; }
+    public ReportStatus Status { get; set; }
 
     public byte[] EncryptedContent { get; set; } = null!;
 
