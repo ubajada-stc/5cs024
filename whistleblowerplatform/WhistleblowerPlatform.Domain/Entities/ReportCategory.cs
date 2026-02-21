@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WhistleblowerPlatform.Infrastructure;
+namespace WhistleblowerPlatform.Domain.Entities;
 
 public partial class ReportCategory
 {
@@ -14,10 +14,6 @@ public partial class ReportCategory
     public int DisplayOrder { get; set; }
 
     public bool IsActive { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 }

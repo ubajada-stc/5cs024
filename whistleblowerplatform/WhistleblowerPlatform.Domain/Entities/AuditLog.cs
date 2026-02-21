@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WhistleblowerPlatform.Infrastructure;
+namespace WhistleblowerPlatform.Domain.Entities;
 
 public partial class AuditLog
 {

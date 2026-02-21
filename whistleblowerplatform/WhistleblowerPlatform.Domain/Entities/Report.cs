@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using WhistleblowerPlatform.Domain.Enums;
 
-namespace WhistleblowerPlatform.Infrastructure;
+namespace WhistleblowerPlatform.Domain.Entities;
 
-public partial class Report
+public partial class Report : BaseEntity
 {
     public Guid ReportId { get; set; }
 
@@ -42,10 +43,6 @@ public partial class Report
     public bool IsDeleted { get; set; }
 
     public DateTime? DeletedAt { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
 
     public virtual ReportCategory? Category { get; set; }
 

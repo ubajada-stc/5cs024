@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WhistleblowerPlatform.Infrastructure;
+using WhistleblowerPlatform.Domain.Entities;
 
 namespace WhistleblowerPlatform.Infrastructure.Persistence;
 
@@ -154,6 +155,7 @@ public partial class WhistleblowerDbContext : DbContext
                 .HasMaxLength(32)
                 .HasColumnName("WBKeySalt");
             entity.Property(e => e.WbpublicKey).HasColumnName("WBPublicKey");
+            entity.Property(e => e.Status).HasConversion<byte>();
 
             entity.HasOne(d => d.Category).WithMany(p => p.Reports)
                 .HasForeignKey(d => d.CategoryId)
