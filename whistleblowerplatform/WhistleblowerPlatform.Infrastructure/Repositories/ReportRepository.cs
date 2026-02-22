@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using WhistleblowerPlatform.Application.Interfaces;
 using WhistleblowerPlatform.Domain.Entities;
 using WhistleblowerPlatform.Infrastructure.Persistence;
+using WhistleblowerPlatform.Application.DTOs;
 
 namespace WhistleblowerPlatform.Infrastructure.Repositories;
 
@@ -52,5 +53,19 @@ public class ReportRepository : IReportRepository
         var nextSequence = int.Parse(sequencePart) + 1;
 
         return $"{prefix}{nextSequence:D4}";
+    }
+
+    public async Task<List<ReportCategoryDto>> GetActiveCategoriesAsync()
+    {
+        return await _context.ReportCategories
+            .Where(c => c.IsActive)
+            .OrderBy(c => c.DisplayOrder)
+            .Select (c => new ReportCategoryDto
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,
+                Description = c.Description,
+            })
+            .ToListAsync();
     }
 }

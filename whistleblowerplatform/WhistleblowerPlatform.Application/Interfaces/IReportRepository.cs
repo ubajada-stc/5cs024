@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WhistleblowerPlatform.Application.DTOs;
 using WhistleblowerPlatform.Domain.Entities;
 
 namespace WhistleblowerPlatform.Application.Interfaces
@@ -12,5 +13,7 @@ namespace WhistleblowerPlatform.Application.Interfaces
         Task AddAsync(Report report);
         Task<bool> CategoryExistsAsync(int categoryId);
         Task<string> GenerateCaseNumberAsync();
+        Task<List<ReportCategoryDto>> GetActiveCategoriesAsync();
+
     }
 }
