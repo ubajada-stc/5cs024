@@ -2,7 +2,7 @@
 Dream Team Project
 
 # Project Name
-
+Whistleblower Anonymous Reporting Platform
 ## Purpose
 Internal project repository.
 
@@ -12,3 +12,6 @@ Internal project repository.
 
 ## Contributions
 All changes go through pull requests to `dev`.
+
+Members
+Amirat Afolabi Project Manager
