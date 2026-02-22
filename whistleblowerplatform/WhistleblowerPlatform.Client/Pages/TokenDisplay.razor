@@ -1,0 +1,36 @@
+﻿@page "/token/{CaseNumber}"
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="text-center mb-4">
+        <h2 class="text-success">Report Submitted Successfully</h2>
+    </div>
+
+    <div class="alert alert-warning">
+        <h5 class="alert-heading">Save Your Case Token</h5>
+        <p>
+            Your case number is <strong>@CaseNumber</strong>.
+            You will need your case token to check the status of your report and communicate with the investigator.
+        </p>
+        <hr />
+        <p class="mb-0">
+            <strong>This token cannot be recovered if lost.</strong>
+            Write it down or save it in a secure location. Without it, you will permanently lose access to your case.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-body text-center">
+            <p class="text-muted mb-2">Your Case Number</p>
+            <h3 class="font-monospace">@CaseNumber</h3>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-outline-secondary">Return to Home</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string CaseNumber { get; set; } = "";
+}

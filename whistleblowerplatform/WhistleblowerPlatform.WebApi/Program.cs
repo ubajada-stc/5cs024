@@ -20,7 +20,20 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 // Use cases
 builder.Services.AddScoped<SubmitReportUseCase>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("BlazorClient", policy =>
+    {
+        policy.WithOrigins("https://localhost:7299")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("BlazorClient");
+
 
 if (app.Environment.IsDevelopment())
 {

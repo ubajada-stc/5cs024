@@ -1,7 +1,35 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Whistleblower Reporting Platform</h1>
+        <p class="lead text-muted">Report misconduct securely and anonymously. All data is encrypted in your browser before being sent.</p>
+    </div>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+    <div class="row justify-content-center g-4">
+        <div class="col-md-5">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center d-flex flex-column">
+                    <h3 class="card-title">Submit a Report</h3>
+                    <p class="card-text text-muted flex-grow-1">
+                        Submit an anonymous report of misconduct. No account required.
+                        You will receive a secure token to track your case.
+                    </p>
+                    <a href="/submit" class="btn btn-primary btn-lg mt-3">Submit a Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center d-flex flex-column">
+                    <h3 class="card-title">Check Your Case</h3>
+                    <p class="card-text text-muted flex-grow-1">
+                        Already submitted a report? Enter your case token to check the
+                        status and read messages from the investigator.
+                    </p>
+                    <a href="/mailbox" class="btn btn-outline-primary btn-lg mt-3">Check Your Case</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

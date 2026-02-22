@@ -21,8 +21,15 @@ public class ReportController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SubmitReport([FromBody] SubmitReportRequest request)
     {
-        var result = await _submitReportUseCase.ExecuteAsync(request);
-        return Created($"/api/reports/{result.CaseNumber}", result);
+        try
+        {
+            var result = await _submitReportUseCase.ExecuteAsync(request);
+            return Created($"/api/reports/{result.CaseNumber}", result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { errors = ex.Message });
+        }
     }
 
     [HttpGet("categories")]
