@@ -13,5 +13,5 @@ Internal project repository.
 ## Contributions
 All changes go through pull requests to `dev`.
 
-Members
+Members:
 Amirat Afolabi Project Manager
