@@ -23,6 +23,10 @@ public class SubmitReportUseCase
 
     public async Task<SubmitReportResult> ExecuteAsync(SubmitReportRequest request)
     {
+        var validationErrors = Validators.SubmitReportValidator.Validate(request);
+        if (validationErrors.Count > 0)
+            throw new ArgumentException(string.Join(" ", validationErrors));
+
         if (request.CategoryId.HasValue)
         {
             var categoryExists = await _reportRepository.CategoryExistsAsync(request.CategoryId.Value);
