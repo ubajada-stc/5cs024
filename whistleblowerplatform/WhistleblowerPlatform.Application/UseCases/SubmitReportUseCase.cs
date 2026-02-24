@@ -15,10 +15,12 @@ namespace WhistleblowerPlatform.Application.UseCases;
 public class SubmitReportUseCase
 {
     private readonly IReportRepository _reportRepository;
+    private readonly IAttachmentStorageService _attachmentStorage;
 
-    public SubmitReportUseCase(IReportRepository reportRepository)
+    public SubmitReportUseCase(IReportRepository reportRepository, IAttachmentStorageService attachmentStorage)
     {
         _reportRepository = reportRepository;
+        _attachmentStorage = attachmentStorage;
     }
 
     public async Task<SubmitReportResult> ExecuteAsync(SubmitReportRequest request)
@@ -43,9 +45,10 @@ public class SubmitReportUseCase
         var acknowledgementDueAt = now.AddDays(3);
         var feedbackDueAt = now.AddMonths(3);
 
+        var reportId = Uuid.NewSequential();
         var report = new Report
         {
-            ReportId = Uuid.NewSequential(),
+            ReportId = reportId,
             CaseNumber = caseNumber,
             TokenHash = request.TokenHash,
             CategoryId = request.CategoryId,
@@ -64,6 +67,28 @@ public class SubmitReportUseCase
             CreatedAt = now,
             UpdatedAt = now
         };
+
+        foreach (var file in request.Attachments)
+        {
+            var attachmentId = Uuid.NewSequential();
+
+            var storagePath = await _attachmentStorage.SaveAsync(reportId, attachmentId, file.EncryptedContent);
+
+            report.ReportAttachments.Add(new ReportAttachment
+            {
+                AttachmentId = attachmentId,
+                ReportId = reportId,
+                StoragePath = storagePath,
+                EncryptedKeyEnvelope = file.EncryptedKeyEnvelope,
+                WbkeyEnvelope = file.WbKeyEnvelope,
+                EncryptedFileName = file.EncryptedFileName,
+                MimeType = file.MimeType,   
+                FileSize = file.FileSize,
+                CreatedAt = now
+            }
+            );
+        }
+
 
         await _reportRepository.AddAsync(report);
 

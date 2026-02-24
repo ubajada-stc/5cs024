@@ -112,6 +112,20 @@ window.cryptoService = {
         return this._toBase64(bytes);
     },
 
+    //File encryption
+    encryptFile: async function (fileContentBase64, fileNameBase64, keyBase64) {
+        // bundel filename and content as Json payload - ostja xahna cool bil payload, then we encrypt
+        const payload = JSON.stringify({
+            fileName: fileNameBase64,
+            content: fileContentBase64
+        });
+        const encoder = new TextEncoder();
+        const payloadBytes = encoder.encode(payload); // ergajna bil payload hiiiiii - tas shuttle
+        const payloadBase64 = this._toBase64(payloadBytes);
+        return await this.encryptSymmetric(payloadBase64, keyBase64);
+
+    },
+
     // ---- Helper functions ----
 
     _importAesKey: async function (keyBase64) {

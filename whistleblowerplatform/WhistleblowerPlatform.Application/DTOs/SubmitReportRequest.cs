@@ -21,7 +21,7 @@ public class SubmitReportRequest
     public byte[]? EncryptedIdentityKeyEnvelope { get; set; }
 
 
-
+    public List<SubmitAttachmentRequest> Attachments { get; set; } = new();
 
 
 }

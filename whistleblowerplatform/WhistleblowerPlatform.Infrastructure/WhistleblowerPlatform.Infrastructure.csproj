@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <Folder Include="Persistence\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

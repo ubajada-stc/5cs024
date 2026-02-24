@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace WhistleblowerPlatform.Domain.Entities;
 
+//Not inheriting from BaseEntity class since report attachment only uses createdat
 public partial class ReportAttachment
 {
     public Guid AttachmentId { get; set; }

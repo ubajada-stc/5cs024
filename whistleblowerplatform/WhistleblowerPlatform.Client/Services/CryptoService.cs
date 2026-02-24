@@ -50,6 +50,10 @@ public class CryptoService
     /// <summary>Convert a plain string to base64</summary>
     public async Task<string> StringToBase64Async(string text)
         => await _js.InvokeAsync<string>("cryptoService.stringToBase64", text);
+
+    /// <summary>Encrypt file content + filename together with AES-256-GCM</summary>
+    public async Task<EncryptedData> EncryptFileAsync(string fileContentBase64, string fileNameBase64, string keyBase64)
+        => await _js.InvokeAsync<EncryptedData>("cryptoService.encryptFile", fileContentBase64, fileNameBase64, keyBase64);
 }
 
 /// <summary>Result of AES-256-GCM encryption</summary>
