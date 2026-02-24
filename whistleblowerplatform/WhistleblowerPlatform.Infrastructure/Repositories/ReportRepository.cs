@@ -68,4 +68,15 @@ public class ReportRepository : IReportRepository
             })
             .ToListAsync();
     }
+
+    public async Task<byte[]?> GetInvestigatorPublicKeyAsync()
+    {
+        var investigator = await _context.Investigators
+            .Where(i => i.IsActive)
+            .Select(i => i.PublicKey)
+            .FirstOrDefaultAsync();
+
+        return investigator;
+    }
+
 }

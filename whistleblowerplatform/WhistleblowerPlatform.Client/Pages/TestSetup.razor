@@ -1,0 +1,79 @@
+﻿@page "/test-setup"
+@inject HttpClient Http
+@inject WhistleblowerPlatform.Client.Services.CryptoService Crypto
+
+<div class="container mt-4" style="max-width: 600px;">
+    <h2>Test Setup</h2>
+    <div class="alert alert-warning">
+        <strong>Development only.</strong> This page creates a test investigator with a real RSA-4096 keypair.
+        Remove before production.
+    </div>
+
+    @if (message != null)
+    {
+        <div class="alert @(isError ? "alert-danger" : "alert-success")">@message</div>
+    }
+
+    <button class="btn btn-primary" @onclick="CreateTestInvestigator" disabled="@isWorking">
+        @if (isWorking)
+        {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            <span>Generating keypair...</span>
+        }
+        else
+        {
+            <span>Create Test Investigator</span>
+        }
+    </button>
+</div>
+
+@code {
+    private string? message;
+    private bool isError;
+    private bool isWorking;
+
+    private async Task CreateTestInvestigator()
+    {
+        isWorking = true;
+        message = null;
+
+        try
+        {
+            // Generate RSA-4096 keypair in the browser
+            var keypair = await Crypto.GenerateKeypairAsync();
+
+            // For testing, use a simple wrapping key (hash of password)
+            var password = "TestPassword123!";
+            var passwordBase64 = await Crypto.StringToBase64Async(password);
+            var wrappingKey = await Crypto.HashTokenAsync(passwordBase64);
+            var encryptedPrivateKey = await Crypto.EncryptPrivateKeyAsync(keypair.PrivateKey, wrappingKey);
+
+            var payload = new
+            {
+                email = "investigator@example.com",
+                passwordHash = "placeholder_hash",
+                mfaSecret = "placeholder_mfa",
+                publicKey = keypair.PublicKey,
+                encryptedPrivateKey = Convert.ToBase64String(
+                    System.Text.Encoding.UTF8.GetBytes(
+                        System.Text.Json.JsonSerializer.Serialize(encryptedPrivateKey)))
+            };
+
+            var response = await Http.PostAsJsonAsync("api/admin/test-investigator", payload);
+
+            if (response.IsSuccessStatusCode)
+                message = "Test investigator created successfully. You can now submit reports.";
+            else
+            { message = await response.Content.ReadAsStringAsync(); isError = true; }
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+            isError = true;
+        }
+        finally
+        {
+            isWorking = false;
+        }
+    }
+}

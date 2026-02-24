@@ -14,6 +14,7 @@ namespace WhistleblowerPlatform.Application.Interfaces
         Task<bool> CategoryExistsAsync(int categoryId);
         Task<string> GenerateCaseNumberAsync();
         Task<List<ReportCategoryDto>> GetActiveCategoriesAsync();
+        Task<byte[]?> GetInvestigatorPublicKeyAsync();
 
     }
 }

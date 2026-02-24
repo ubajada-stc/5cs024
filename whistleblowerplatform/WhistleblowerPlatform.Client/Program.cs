@@ -7,5 +7,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7178/") });
+builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.CryptoService>();
+
 
 await builder.Build().RunAsync();

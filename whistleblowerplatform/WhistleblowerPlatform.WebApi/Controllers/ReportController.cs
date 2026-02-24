@@ -38,4 +38,18 @@ public class ReportController : ControllerBase
         var categories = await _reportRepository.GetActiveCategoriesAsync();
         return Ok(categories);
     }
+
+    /// <summary>
+    /// Get the investigator's public key for client-side encryption.
+    /// No authentication required.
+    /// </summary>
+    [HttpGet("/api/config/public-key")]
+    public async Task<IActionResult> GetPublicKey()
+    {
+        var publicKey = await _reportRepository.GetInvestigatorPublicKeyAsync();
+        if (publicKey == null)
+            return NotFound("No investigator public key found.");
+
+        return Ok(new { publicKey = Convert.ToBase64String(publicKey) });
+    }
 }

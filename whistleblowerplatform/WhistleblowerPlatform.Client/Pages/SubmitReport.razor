@@ -1,6 +1,7 @@
 ﻿@page "/submit"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject WhistleblowerPlatform.Client.Services.CryptoService Crypto
 
 <div class="container mt-4" style="max-width: 720px;">
     <h2 class="mb-4">Submit a Report</h2>
@@ -63,7 +64,7 @@
         @if (isSubmitting)
         {
             <span class="spinner-border spinner-border-sm me-2"></span>
-            <span>Submitting...</span>
+            <span>Encrypting and submitting...</span>
         }
         else
         {
@@ -108,30 +109,114 @@
 
         try
         {
-            // =====================================================
-            // TEMPORARY: Send plaintext for now.
-            // In the next step we will add client-side encryption
-            // using the CryptoService (Web Crypto API via JS interop).
-            // This placeholder lets us verify the full flow works
-            // end-to-end before adding the encryption layer.
-            // =====================================================
+            // ==========================================================
+            // STEP 1: Generate token and hash it
+            // ==========================================================
+            var token = await Crypto.GenerateTokenAsync();
+            var tokenHash = await Crypto.HashTokenAsync(token);
+
+            // ==========================================================
+            // STEP 2: Generate WB keypair
+            // ==========================================================
+            var wbKeypair = await Crypto.GenerateKeypairAsync();
+
+            // ==========================================================
+            // STEP 3: Encrypt WB private key with a wrapping key
+            //         Using token as the wrapping key source
+            //         (Argon2id will replace this later)
+            // ==========================================================
+            var wbKeySalt = Convert.ToBase64String(
+                System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
+            var wrappingKey = await Crypto.HashTokenAsync(token); // temporary: hash as wrapping key
+            var encryptedWbPrivateKey = await Crypto.EncryptPrivateKeyAsync(
+                wbKeypair.PrivateKey, wrappingKey);
+
+            // ==========================================================
+            // STEP 4: Fetch and verify investigator's public key
+            // ==========================================================
+            var publicKeyResponse = await Http.GetFromJsonAsync<PublicKeyDto>("api/config/public-key");
+            if (publicKeyResponse == null)
+            {
+                errorMessage = "Failed to fetch investigator's public key.";
+                return;
+            }
+            var investigatorPublicKey = publicKeyResponse.PublicKey;
+
+            // TODO: Verify fingerprint against hardcoded value (US-1.6)
+
+            // ==========================================================
+            // STEP 5: Encrypt report text
+            // ==========================================================
+            var reportSymmetricKey = await Crypto.GenerateSymmetricKeyAsync();
+            var reportTextBase64 = await Crypto.StringToBase64Async(reportText);
+            var encryptedReport = await Crypto.EncryptSymmetricAsync(reportTextBase64, reportSymmetricKey);
+
+            // ==========================================================
+            // STEP 6: Encrypt report symmetric key for both recipients
+            // ==========================================================
+            var reportKeyEnvelope = await Crypto.EncryptWithPublicKeyAsync(
+                reportSymmetricKey, investigatorPublicKey);
+            var wbReportKeyEnvelope = await Crypto.EncryptWithPublicKeyAsync(
+                reportSymmetricKey, wbKeypair.PublicKey);
+
+            // ==========================================================
+            // STEP 7: Encrypt identity fields (if provided)
+            // ==========================================================
+            bool selfIdentified = !string.IsNullOrWhiteSpace(identityName) ||
+                                  !string.IsNullOrWhiteSpace(identityEmail) ||
+                                  !string.IsNullOrWhiteSpace(identityPhone);
+
+            string? encryptedIdentityPayload = null;
+            string? identityKeyEnvelopePayload = null;
+
+            if (selfIdentified)
+            {
+                var identityJson = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    name = string.IsNullOrWhiteSpace(identityName) ? null : identityName,
+                    email = string.IsNullOrWhiteSpace(identityEmail) ? null : identityEmail,
+                    phone = string.IsNullOrWhiteSpace(identityPhone) ? null : identityPhone
+                });
+
+                var identityKey = await Crypto.GenerateSymmetricKeyAsync();
+                var identityBase64 = await Crypto.StringToBase64Async(identityJson);
+                var encryptedIdentity = await Crypto.EncryptSymmetricAsync(identityBase64, identityKey);
+                var identityKeyEnvelope = await Crypto.EncryptWithPublicKeyAsync(
+                    identityKey, investigatorPublicKey);
+
+                // Serialize the encrypted identity as JSON string
+                encryptedIdentityPayload = Convert.ToBase64String(
+                    System.Text.Encoding.UTF8.GetBytes(
+                        System.Text.Json.JsonSerializer.Serialize(encryptedIdentity)));
+                identityKeyEnvelopePayload = identityKeyEnvelope;
+            }
+
+            // ==========================================================
+            // STEP 8: Build and send the encrypted payload
+            // ==========================================================
+
+            // Combine encrypted report fields into single blobs for the API
+            var encryptedContentBlob = Convert.ToBase64String(
+                System.Text.Encoding.UTF8.GetBytes(
+                    System.Text.Json.JsonSerializer.Serialize(encryptedReport)));
 
             var payload = new
             {
-                tokenHash = Convert.ToBase64String(new byte[32]),        // placeholder
-                categoryId = string.IsNullOrEmpty(selectedCategoryId) ? (int?)null : int.Parse(selectedCategoryId),
-                encryptedContent = Convert.ToBase64String(
-                    System.Text.Encoding.UTF8.GetBytes(reportText)),     // placeholder — not actually encrypted
-                encryptedKeyEnvelope = Convert.ToBase64String(new byte[16]),
-                wbKeyEnvelope = Convert.ToBase64String(new byte[16]),
-                wbPublicKey = Convert.ToBase64String(new byte[16]),
-                encryptedWbPrivateKey = Convert.ToBase64String(new byte[16]),
-                wbKeySalt = Convert.ToBase64String(new byte[16]),
-                selfIdentified = !string.IsNullOrEmpty(identityName) ||
-                                 !string.IsNullOrEmpty(identityEmail) ||
-                                 !string.IsNullOrEmpty(identityPhone),
-                encryptedIdentity = (string?)null,
-                encryptedIdentityKeyEnvelope = (string?)null
+                tokenHash = tokenHash,
+                categoryId = string.IsNullOrEmpty(selectedCategoryId)
+                    ? (int?)null
+                    : int.Parse(selectedCategoryId),
+                encryptedContent = encryptedContentBlob,
+                encryptedKeyEnvelope = reportKeyEnvelope,
+                wbKeyEnvelope = wbReportKeyEnvelope,
+                wbPublicKey = wbKeypair.PublicKey,
+                encryptedWbPrivateKey = Convert.ToBase64String(
+                    System.Text.Encoding.UTF8.GetBytes(
+                        System.Text.Json.JsonSerializer.Serialize(encryptedWbPrivateKey))),
+                wbKeySalt = wbKeySalt,
+                selfIdentified = selfIdentified,
+                encryptedIdentity = encryptedIdentityPayload,
+                encryptedIdentityKeyEnvelope = identityKeyEnvelopePayload
             };
 
             var response = await Http.PostAsJsonAsync("api/reports", payload);
@@ -139,7 +224,8 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<SubmitResultDto>();
-                Navigation.NavigateTo($"/token/{result?.CaseNumber}");
+                // Navigate to token display, passing the raw token (not the hash)
+                Navigation.NavigateTo($"/token/{result?.CaseNumber}/{Uri.EscapeDataString(token)}");
             }
             else
             {
@@ -167,5 +253,10 @@
     private class SubmitResultDto
     {
         public string CaseNumber { get; set; } = "";
+    }
+
+    private class PublicKeyDto
+    {
+        public string PublicKey { get; set; } = "";
     }
 }
