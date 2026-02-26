@@ -18,15 +18,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
       - name: dotnet publish
         run: dotnet publish WhistleblowerPlatform.WebApi/WhistleblowerPlatform.WebApi.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - name: Verify Blazor files
+        run: ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/_framework/blazor.webassembly.js*
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+          include-hidden-files: true
   deploy:
     runs-on: ubuntu-latest
     needs: build

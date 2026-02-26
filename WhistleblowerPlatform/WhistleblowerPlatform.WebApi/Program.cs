@@ -49,8 +49,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();   
-app.UseStaticFiles();             
+app.UseBlazorFrameworkFiles();
+var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+provider.Mappings[".wasm"] = "application/wasm";
+provider.Mappings[".br"] = "application/octet-stream";
+provider.Mappings[".dat"] = "application/octet-stream";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
 
 app.UseAuthorization();
 app.MapControllers();
