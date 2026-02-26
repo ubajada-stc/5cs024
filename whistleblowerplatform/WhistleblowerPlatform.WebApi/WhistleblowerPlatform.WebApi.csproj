@@ -9,9 +9,11 @@
   <ItemGroup>
     <ProjectReference Include="..\WhistleblowerPlatform.Application\WhistleblowerPlatform.Application.csproj" />
     <ProjectReference Include="..\WhistleblowerPlatform.Infrastructure\WhistleblowerPlatform.Infrastructure.csproj" />
+	  <ProjectReference Include="..\WhistleblowerPlatform.Client\WhistleblowerPlatform.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.24">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
