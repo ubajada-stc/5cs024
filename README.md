@@ -15,3 +15,5 @@ All changes go through pull requests to `dev`.
 
 Members:
 Amirat Afolabi Project Manager
+Adewunmi Michael Security Analyst
+
