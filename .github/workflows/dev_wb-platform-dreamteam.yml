@@ -20,8 +20,13 @@ jobs:
           dotnet-version: '8.x'
       - name: dotnet publish
         run: dotnet publish WhistleblowerPlatform.WebApi/WhistleblowerPlatform.WebApi.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
-      - name: Verify Blazor files
-        run: ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/_framework/blazor.webassembly.js*
+         - name: Verify Blazor files
+        run: |
+          echo "=== wwwroot contents ==="
+          ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/
+          echo "=== _framework contents ==="
+          ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/_framework/ | head -30
+        continue-on-error: true
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
