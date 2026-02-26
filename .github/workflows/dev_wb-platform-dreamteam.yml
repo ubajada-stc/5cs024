@@ -17,15 +17,15 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '8.0.x'
       - name: dotnet publish
         run: dotnet publish WhistleblowerPlatform.WebApi/WhistleblowerPlatform.WebApi.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
       - name: Verify Blazor files
         run: |
-          echo "=== wwwroot contents ==="
-          ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/
-          echo "=== _framework contents ==="
-          ls -la ${{env.DOTNET_ROOT}}/myapp/wwwroot/_framework/ | head -30
+          echo "=== .NET SDK version ==="
+          dotnet --version
+          echo "=== blazor files ==="
+          find ${{env.DOTNET_ROOT}}/myapp/wwwroot/_framework -name "blazor*"
         continue-on-error: true
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
