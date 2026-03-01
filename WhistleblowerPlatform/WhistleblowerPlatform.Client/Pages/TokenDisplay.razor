@@ -1,0 +1,71 @@
+﻿@page "/token/{CaseNumber}/{Token}"
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="text-center mb-4">
+        <h2 class="text-success">Report Submitted Successfully</h2>
+    </div>
+
+    <div class="alert alert-danger">
+        <h5 class="alert-heading">⚠ Save Your Case Token NOW</h5>
+        <p>
+            This is the <strong>only time</strong> your token will be displayed.
+            If you lose it, you will <strong>permanently lose access</strong> to your case.
+            There is no recovery mechanism.
+        </p>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body text-center">
+            <p class="text-muted mb-1">Case Number</p>
+            <h4>@CaseNumber</h4>
+        </div>
+    </div>
+
+    <div class="card mb-3 border-primary">
+        <div class="card-body text-center">
+            <p class="text-muted mb-1">Your Secret Token</p>
+            <h5 class="font-monospace text-break">@Uri.UnescapeDataString(Token)</h5>
+            <button class="btn btn-outline-primary btn-sm mt-2" @onclick="CopyToken">
+                Copy to Clipboard
+            </button>
+            @if (copied)
+            {
+                <span class="text-success ms-2">Copied!</span>
+            }
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>Instructions:</strong>
+        <ul class="mb-0 mt-2">
+            <li>Write down or securely save the token above</li>
+            <li>Use it to check your case status and read messages</li>
+            <li>Do not share it with anyone you don't trust</li>
+            <li>This token cannot be recovered if lost</li>
+        </ul>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-outline-secondary">Return to Home</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string CaseNumber { get; set; } = "";
+
+    [Parameter]
+    public string Token { get; set; } = "";
+
+    private bool copied = false;
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    private async Task CopyToken()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", Uri.UnescapeDataString(Token));
+        copied = true;
+        StateHasChanged();
+    }
+}

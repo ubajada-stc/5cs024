@@ -1,0 +1,6 @@
+@WhistleblowerPlatform.WebApi_HostAddress = http://localhost:5179
+
+GET {{WhistleblowerPlatform.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

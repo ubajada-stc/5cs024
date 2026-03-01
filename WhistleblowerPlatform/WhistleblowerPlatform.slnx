@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="WhistleblowerPlatform.Application/WhistleblowerPlatform.Application.csproj" />
+  <Project Path="WhistleblowerPlatform.Client/WhistleblowerPlatform.Client.csproj" />
+  <Project Path="WhistleblowerPlatform.Domain/WhistleblowerPlatform.Domain.csproj" />
+  <Project Path="WhistleblowerPlatform.Infrastructure/WhistleblowerPlatform.Infrastructure.csproj" />
+  <Project Path="WhistleblowerPlatform.WebApi/WhistleblowerPlatform.WebApi.csproj" />
+</Solution>
