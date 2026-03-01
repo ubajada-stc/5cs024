@@ -4,4 +4,5 @@
   <Project Path="WhistleblowerPlatform.Domain/WhistleblowerPlatform.Domain.csproj" />
   <Project Path="WhistleblowerPlatform.Infrastructure/WhistleblowerPlatform.Infrastructure.csproj" />
   <Project Path="WhistleblowerPlatform.WebApi/WhistleblowerPlatform.WebApi.csproj" />
+  <Project Path="WhistleblowerPlatform.Tests/WhistleblowerPlatform.Tests.csproj" />
 </Solution>

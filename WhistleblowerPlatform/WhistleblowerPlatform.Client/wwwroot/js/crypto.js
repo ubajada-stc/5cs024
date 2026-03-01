@@ -20,7 +20,7 @@ window.cryptoService = {
     generateSymmetricKey: async function () {
         const key = await crypto.subtle.generateKey(
             { name: "AES-GCM", length: 256 },
-            true,  // extractable
+            true,
             ["encrypt", "decrypt"]
         );
         const rawKey = await crypto.subtle.exportKey("raw", key);
@@ -39,7 +39,6 @@ window.cryptoService = {
             plaintext
         );
 
-        // Web Crypto API appends the 16-byte auth tag to the ciphertext
         const encryptedArray = new Uint8Array(encrypted);
         const ciphertext = encryptedArray.slice(0, encryptedArray.length - 16);
         const authTag = encryptedArray.slice(encryptedArray.length - 16);
@@ -51,7 +50,7 @@ window.cryptoService = {
         };
     },
 
-    // Generate RSA-OAEP 4096-bit keypair (returns { publicKey, privateKey } as base64 SPKI/PKCS8)
+    // Generate RSA-OAEP 4096-bit keypair
     generateKeypair: async function () {
         const keypair = await crypto.subtle.generateKey(
             {
@@ -60,7 +59,7 @@ window.cryptoService = {
                 publicExponent: new Uint8Array([1, 0, 1]),
                 hash: "SHA-256"
             },
-            true,  // extractable
+            true,
             ["encrypt", "decrypt"]
         );
 
@@ -73,7 +72,7 @@ window.cryptoService = {
         };
     },
 
-    // Encrypt symmetric key with RSA-OAEP public key (returns base64 ciphertext)
+    // Encrypt symmetric key with RSA-OAEP public key
     encryptWithPublicKey: async function (dataBase64, publicKeyBase64) {
         const publicKey = await crypto.subtle.importKey(
             "spki",
@@ -98,7 +97,7 @@ window.cryptoService = {
         return await this.encryptSymmetric(privateKeyBase64, wrappingKeyBase64);
     },
 
-    // SHA-256 fingerprint of a public key (returns base64)
+    // SHA-256 fingerprint of a public key
     fingerprintPublicKey: async function (publicKeyBase64) {
         const keyBytes = this._fromBase64(publicKeyBase64);
         const hash = await crypto.subtle.digest("SHA-256", keyBytes);
@@ -112,18 +111,63 @@ window.cryptoService = {
         return this._toBase64(bytes);
     },
 
-    //File encryption
+    // File encryption (original — single encryption)
     encryptFile: async function (fileContentBase64, fileNameBase64, keyBase64) {
-        // bundel filename and content as Json payload - ostja xahna cool bil payload, then we encrypt
         const payload = JSON.stringify({
             fileName: fileNameBase64,
             content: fileContentBase64
         });
         const encoder = new TextEncoder();
-        const payloadBytes = encoder.encode(payload); // ergajna bil payload hiiiiii - tas shuttle
+        const payloadBytes = encoder.encode(payload);
         const payloadBase64 = this._toBase64(payloadBytes);
         return await this.encryptSymmetric(payloadBase64, keyBase64);
+    },
 
+    // File encryption for sanitization (dual encryption — ADR-001)
+    encryptFileForSanitization: async function (fileContentBase64, fileNameBase64, investigatorPublicKeyBase64, wbPublicKeyBase64) {
+
+        // Bundle filename and content into a JSON payload
+        const payload = JSON.stringify({
+            fileName: fileNameBase64,
+            content: fileContentBase64
+        });
+        const payloadBytes = new TextEncoder().encode(payload);
+        const payloadBase64 = this._toBase64(payloadBytes);
+
+        // =========================================================
+        // 1. SANITIZATION ENCRYPTION
+        // =========================================================
+
+        const sanitizationKeyBase64 = await this.generateSymmetricKey();
+        const sanitizationEncrypted = await this.encryptSymmetric(payloadBase64, sanitizationKeyBase64);
+
+        // =========================================================
+        // 2. RECIPIENT ENCRYPTION
+        // =========================================================
+
+        const recipientKeyBase64 = await this.generateSymmetricKey();
+        const recipientEncrypted = await this.encryptSymmetric(payloadBase64, recipientKeyBase64);
+
+        // Wrap recipient key with investigator's public key
+        const keyEnvelope = await this.encryptWithPublicKey(recipientKeyBase64, investigatorPublicKeyBase64);
+
+        // Wrap recipient key with WB's public key
+        const wbKeyEnvelope = await this.encryptWithPublicKey(recipientKeyBase64, wbPublicKeyBase64);
+
+        // =========================================================
+        // 3. RETURN ALL ENCRYPTED DATA
+        // =========================================================
+
+        return {
+            // Sanitization data (server can decrypt)
+            sanitizationBlob: sanitizationEncrypted,
+            sanitizationKey: sanitizationKeyBase64,
+
+            // Recipient data (investigator + WB can decrypt)
+            recipientBlob: recipientEncrypted,
+            keyEnvelope: keyEnvelope,
+            wbKeyEnvelope: wbKeyEnvelope
+        };
     },
 
     // ---- Helper functions ----

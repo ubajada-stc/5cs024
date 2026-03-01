@@ -54,6 +54,18 @@ public class CryptoService
     /// <summary>Encrypt file content + filename together with AES-256-GCM</summary>
     public async Task<EncryptedData> EncryptFileAsync(string fileContentBase64, string fileNameBase64, string keyBase64)
         => await _js.InvokeAsync<EncryptedData>("cryptoService.encryptFile", fileContentBase64, fileNameBase64, keyBase64);
+
+    public async Task<DualEncryptedFileResult> EncryptFileForSanitizationAsync(
+    string fileContentBase64, string fileNameBase64,
+    string investigatorPublicKeyBase64, string wbPublicKeyBase64)
+    {
+        var result = await _js.InvokeAsync<DualEncryptedFileResult>(
+            "cryptoService.encryptFileForSanitization",
+            fileContentBase64, fileNameBase64,
+            investigatorPublicKeyBase64, wbPublicKeyBase64);
+        return result;
+    }
+
 }
 
 /// <summary>Result of AES-256-GCM encryption</summary>
@@ -69,4 +81,16 @@ public class KeyPairResult
 {
     public string PublicKey { get; set; } = "";
     public string PrivateKey { get; set; } = "";
+}
+
+public class DualEncryptedFileResult
+{
+    // Sanitization data
+    public EncryptedData SanitizationBlob { get; set; } = null!;
+    public string SanitizationKey { get; set; } = "";
+
+    // Recipient data
+    public EncryptedData RecipientBlob { get; set; } = null!;
+    public string KeyEnvelope { get; set; } = "";
+    public string WbKeyEnvelope { get; set; } = "";
 }

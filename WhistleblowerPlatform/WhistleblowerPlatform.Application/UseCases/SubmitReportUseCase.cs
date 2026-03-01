@@ -72,7 +72,13 @@ public class SubmitReportUseCase
         {
             var attachmentId = Uuid.NewSequential();
 
-            var storagePath = await _attachmentStorage.SaveAsync(reportId, attachmentId, file.EncryptedContent);
+            // Save the recipient-encrypted blob
+            var storagePath = await _attachmentStorage.SaveAsync(
+                reportId, attachmentId, file.EncryptedContent);
+
+            // Save the sanitization-encrypted blob
+            var sanitizationStoragePath = await _attachmentStorage.SaveAsync(
+                reportId, attachmentId, file.SanitizationBlob, ".sanitization");
 
             report.ReportAttachments.Add(new ReportAttachment
             {
@@ -82,11 +88,15 @@ public class SubmitReportUseCase
                 EncryptedKeyEnvelope = file.EncryptedKeyEnvelope,
                 WbkeyEnvelope = file.WbKeyEnvelope,
                 EncryptedFileName = file.EncryptedFileName,
-                MimeType = file.MimeType,   
+                MimeType = file.MimeType,
                 FileSize = file.FileSize,
-                CreatedAt = now
-            }
-            );
+                CreatedAt = now,
+
+                // Sanitization fields (ADR-001)
+                SanitizationStoragePath = sanitizationStoragePath,
+                SanitizationKey = file.SanitizationKey,
+                SanitizationStatus = SanitizationStatus.Queued
+            });
         }
 
 
