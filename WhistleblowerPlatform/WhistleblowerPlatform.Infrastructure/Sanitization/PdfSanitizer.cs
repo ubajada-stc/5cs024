@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using iText.Kernel.Pdf;
 using WhistleblowerPlatform.Application.Interfaces;
 
 namespace WhistleblowerPlatform.Infrastructure.Sanitization;
@@ -19,14 +15,29 @@ public class PdfSanitizer : IFileSanitizer
         string mimeType,
         CancellationToken cancellationToken = default)
     {
-        // TODO: Implement PDF metadata stripping
-        // For now, pass through unchanged.
-        // The background service will mark this as "Completed" but a future
-        // implementation should actually strip the /Info dictionary and XMP.
+        using var inputStream = new MemoryStream(fileContent);
+        using var outputStream = new MemoryStream();
+
+        using var reader = new PdfReader(inputStream);
+        using var writer = new PdfWriter(outputStream);
+        using var pdfDoc = new PdfDocument(reader, writer);
+
+        // Strip /Info dictionary — contains author, title, subject, keywords, creator
+        var info = pdfDoc.GetDocumentInfo();
+        info.SetTitle(string.Empty);
+        info.SetAuthor(string.Empty);
+        info.SetSubject(string.Empty);
+        info.SetKeywords(string.Empty);
+        info.SetCreator(string.Empty);
+
+        // Remove the XMP metadata stream from the document catalog
+        pdfDoc.GetCatalog().GetPdfObject().Remove(PdfName.Metadata);
+
+        pdfDoc.Close();
 
         return Task.FromResult(new SanitizationResult
         {
-            SanitizedContent = fileContent,
+            SanitizedContent = outputStream.ToArray(),
             MimeType = mimeType
         });
     }

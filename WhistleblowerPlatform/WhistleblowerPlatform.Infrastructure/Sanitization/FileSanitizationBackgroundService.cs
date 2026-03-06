@@ -13,29 +13,18 @@ using WhistleblowerPlatform.Domain.Enums;
 namespace WhistleblowerPlatform.Infrastructure.Sanitization;
 
 /// <summary>
-/// Background service that polls for queued file attachments and processes
-/// them through the sanitization pipeline.
-/// 
-/// Design choices:
-///   - Polling loop (not event-driven) for simplicity and reliability
-///   - SemaphoreSlim limits concurrent sanitizations to control memory usage
-///   - Scoped DbContext per iteration (EF Core best practice for background services)
-///   - Graceful shutdown via CancellationToken from the host
-/// 
-/// Configuration:
-///   - Poll interval: how often to check for queued files (default: 30 seconds)
-///   - Max concurrency: maximum parallel file sanitizations (default: 2)
-///   - Both configurable via PlatformSettings or appsettings.json
+/// Background service that checks for queued file attachments and processes
+/// them through the sanitization pipeline
 /// </summary>
 public class FileSanitizationBackgroundService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<FileSanitizationBackgroundService> _logger;
 
-    /// <summary>How often to poll the database for queued files.</summary>
+    //How often to check the database for queued files
     private readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(30);
 
-    /// <summary>Maximum number of files being sanitized concurrently.</summary>
+    //Maximum number of files being sanitized concurrently
     private readonly int _maxConcurrency = 2;
 
     public FileSanitizationBackgroundService(
