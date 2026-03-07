@@ -25,6 +25,9 @@ var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "blob-storage");
 builder.Services.AddSingleton<IAttachmentStorageService>(new LocalBlobStorageService(storagePath));
 builder.Services.AddFileSanitization();
 
+//hCaptcha verification
+builder.Services.AddHttpClient<IHCaptchaService, HCaptchaService>();
+
 // Use cases
 builder.Services.AddScoped<SubmitReportUseCase>();
 

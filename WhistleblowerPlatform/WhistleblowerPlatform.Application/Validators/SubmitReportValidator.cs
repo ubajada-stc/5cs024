@@ -63,6 +63,11 @@ public static class SubmitReportValidator
             }
         }
 
+        if (string.IsNullOrWhiteSpace(request.HCaptchaToken))
+        {
+            errors.Add("CAPTCHA verification is required");
+        }
+
         return errors;
     }
 }

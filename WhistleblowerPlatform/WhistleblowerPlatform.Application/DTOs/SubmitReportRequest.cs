@@ -19,6 +19,7 @@ public class SubmitReportRequest
     public bool SelfIdentified { get; set; }
     public byte[]? EncryptedIdentity { get; set; }
     public byte[]? EncryptedIdentityKeyEnvelope { get; set; }
+    public string HCaptchaToken { get; set; } = string.Empty;
 
 
     public List<SubmitAttachmentRequest> Attachments { get; set; } = new();

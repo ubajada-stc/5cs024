@@ -16,11 +16,13 @@ public class SubmitReportUseCase
 {
     private readonly IReportRepository _reportRepository;
     private readonly IAttachmentStorageService _attachmentStorage;
+    private readonly IHCaptchaService _hCaptchaService;
 
-    public SubmitReportUseCase(IReportRepository reportRepository, IAttachmentStorageService attachmentStorage)
+    public SubmitReportUseCase(IReportRepository reportRepository, IAttachmentStorageService attachmentStorage, IHCaptchaService hCaptchaService)
     {
         _reportRepository = reportRepository;
         _attachmentStorage = attachmentStorage;
+        _hCaptchaService = hCaptchaService;
     }
 
     public async Task<SubmitReportResult> ExecuteAsync(SubmitReportRequest request)
@@ -28,6 +30,12 @@ public class SubmitReportUseCase
         var validationErrors = Validators.SubmitReportValidator.Validate(request);
         if (validationErrors.Count > 0)
             throw new ArgumentException(string.Join(" ", validationErrors));
+
+        var isCaptchaValid = await _hCaptchaService.VerifyTokenAsync(request.HCaptchaToken);
+        if (!isCaptchaValid)
+        {            
+            throw new InvalidOperationException("CAPTCHA verification failed");
+        }
 
         if (request.CategoryId.HasValue)
         {
