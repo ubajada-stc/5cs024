@@ -174,6 +174,11 @@ public partial class WhistleblowerDbContext : DbContext
             entity.Property(e => e.StoragePath).HasMaxLength(500);
             entity.Property(e => e.WbkeyEnvelope).HasColumnName("WBKeyEnvelope");
 
+            // Sanitization columns (ADR-001)
+            entity.Property(e => e.SanitizationStoragePath).HasMaxLength(500);
+            entity.Property(e => e.SanitizationError).HasMaxLength(500);
+            entity.Property(e => e.SanitizationStatus).HasConversion<byte>();
+
             entity.HasOne(d => d.Report).WithMany(p => p.ReportAttachments)
                 .HasForeignKey(d => d.ReportId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

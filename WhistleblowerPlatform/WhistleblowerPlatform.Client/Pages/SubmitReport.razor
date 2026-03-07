@@ -287,7 +287,10 @@
             }
 
             // ==========================================================
-            // STEP 7: Encrypt file attachments
+            // STEP 7: Encrypt file attachments (dual encryption — ADR-001)
+            // Each file is encrypted twice:
+            //   1. Sanitization key (server can decrypt to strip metadata)
+            //   2. Recipient key envelopes (investigator + WB)
             // ==========================================================
             var encryptedAttachments = new List<object>();
 
@@ -306,24 +309,30 @@
                 // Encrypt filename
                 var fileNameBase64 = await Crypto.StringToBase64Async(file.Name);
 
-                // Generate unique key for this file and encrypt
-                var fileKey = await Crypto.GenerateSymmetricKeyAsync();
-                var encryptedFile = await Crypto.EncryptFileAsync(fileContentBase64, fileNameBase64, fileKey);
+                // Dual encryption: sanitization + recipient
+                var dualEncrypted = await Crypto.EncryptFileForSanitizationAsync(
+                    fileContentBase64, fileNameBase64, investigatorPublicKey, wbKeypair.PublicKey);
 
-                // Encrypt file key for both recipients
-                var fileKeyEnvelope = await Crypto.EncryptWithPublicKeyAsync(fileKey, investigatorPublicKey);
-                var wbFileKeyEnvelope = await Crypto.EncryptWithPublicKeyAsync(fileKey, wbKeypair.PublicKey);
-
-                // Serialize encrypted content
+                // Serialize the recipient encrypted content
                 var encryptedContentBlob = Convert.ToBase64String(
                     System.Text.Encoding.UTF8.GetBytes(
-                        System.Text.Json.JsonSerializer.Serialize(encryptedFile)));
+                        System.Text.Json.JsonSerializer.Serialize(dualEncrypted.RecipientBlob)));
+
+                // Serialize the sanitization blob
+                var sanitizationBlobSerialized = Convert.ToBase64String(
+                    System.Text.Encoding.UTF8.GetBytes(
+                        System.Text.Json.JsonSerializer.Serialize(dualEncrypted.SanitizationBlob)));
 
                 encryptedAttachments.Add(new
                 {
+                    // Sanitization data (server can decrypt to strip metadata)
+                    sanitizationBlob = sanitizationBlobSerialized,
+                    sanitizationKey = dualEncrypted.SanitizationKey,
+
+                    // Recipient data (investigator + WB can decrypt)
                     encryptedContent = encryptedContentBlob,
-                    encryptedKeyEnvelope = fileKeyEnvelope,
-                    wbKeyEnvelope = wbFileKeyEnvelope,
+                    encryptedKeyEnvelope = dualEncrypted.KeyEnvelope,
+                    wbKeyEnvelope = dualEncrypted.WbKeyEnvelope,
                     encryptedFileName = Convert.ToBase64String(
                         System.Text.Encoding.UTF8.GetBytes(fileNameBase64)),
                     mimeType = file.ContentType,

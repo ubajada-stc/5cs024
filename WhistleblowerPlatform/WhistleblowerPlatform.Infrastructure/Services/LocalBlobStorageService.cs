@@ -13,17 +13,37 @@ public class LocalBlobStorageService : IAttachmentStorageService
 
     public LocalBlobStorageService(string basePath)
     {
-        _basePath = basePath; 
+        _basePath = basePath;
     }
 
-    public async Task<string> SaveAsync(Guid reportId, Guid attachmentId, byte[] encryptedContent)
+    public Task<string> SaveAsync(Guid reportId, Guid attachmentId, byte[] encryptedContent)
     {
-        var directory = Path.Combine(_basePath, "report", reportId.ToString());
+        return SaveAsync(reportId, attachmentId, encryptedContent, ".enc");
+    }
+
+    public async Task<string> SaveAsync(Guid reportId, Guid attachmentId, byte[] encryptedContent, string suffix)
+    {
+        var directory = Path.Combine(_basePath, "reports", reportId.ToString());
         Directory.CreateDirectory(directory);
 
-        var filePath = Path.Combine(directory, $"{attachmentId}.enc");
+        var filePath = Path.Combine(directory, $"{attachmentId}{suffix}");
         await File.WriteAllBytesAsync(filePath, encryptedContent);
 
-        return $"/reports/{reportId}/{attachmentId}.enc";
+        return $"reports/{reportId}/{attachmentId}{suffix}";
+    }
+
+    public async Task<byte[]> ReadAsync(string storagePath)
+    {
+        var fullPath = Path.Combine(_basePath, storagePath);
+        return await File.ReadAllBytesAsync(fullPath);
+    }
+
+    public async Task DeleteAsync(string storagePath)
+    {
+        var fullPath = Path.Combine(_basePath, storagePath);
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
     }
 }

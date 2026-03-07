@@ -9,4 +9,7 @@ namespace WhistleblowerPlatform.Application.Interfaces;
 public interface IAttachmentStorageService
 {
     Task<string> SaveAsync(Guid reportId, Guid attachmentId, byte[] encryptedContent);
+    Task<string> SaveAsync(Guid reportId, Guid attachmentId, byte[] encryptedContent, string suffix);
+    Task<byte[]> ReadAsync(string storagePath);
+    Task DeleteAsync(string storagePath);
 }

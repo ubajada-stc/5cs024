@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WhistleblowerPlatform.Domain.Enums;
 
 namespace WhistleblowerPlatform.Domain.Entities;
 
@@ -11,6 +12,16 @@ public partial class ReportAttachment
     public Guid ReportId { get; set; }
 
     public string StoragePath { get; set; } = null!;
+
+    public string? SanitizationStoragePath { get; set; }
+
+    public byte[]? SanitizationKey { get; set; }
+
+    public SanitizationStatus SanitizationStatus { get; set; } = SanitizationStatus.Queued;
+
+    public string? SanitizationError { get; set; }
+
+    public DateTime? SanitizedAt { get; set; }
 
     public byte[] EncryptedKeyEnvelope { get; set; } = null!;
 

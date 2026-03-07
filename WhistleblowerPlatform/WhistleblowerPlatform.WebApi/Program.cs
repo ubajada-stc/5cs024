@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WhistleblowerPlatform.Application.Interfaces;
 using WhistleblowerPlatform.Application.UseCases;
+using WhistleblowerPlatform.Infrastructure;
 using WhistleblowerPlatform.Infrastructure.Persistence;
 using WhistleblowerPlatform.Infrastructure.Repositories;
 using WhistleblowerPlatform.Infrastructure.Services;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 //BlobStorage
 var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "blob-storage");
 builder.Services.AddSingleton<IAttachmentStorageService>(new LocalBlobStorageService(storagePath));
+builder.Services.AddFileSanitization();
 
 // Use cases
 builder.Services.AddScoped<SubmitReportUseCase>();

@@ -16,4 +16,8 @@ public class SubmitAttachmentRequest
     public required string MimeType { get; set; }
 
     public required long FileSize { get; set; }
+
+    public required byte[] SanitizationBlob { get; set; }
+
+    public required byte[] SanitizationKey { get; set; }
 }
