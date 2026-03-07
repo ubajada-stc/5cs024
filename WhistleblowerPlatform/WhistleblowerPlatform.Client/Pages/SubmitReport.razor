@@ -1,7 +1,10 @@
-﻿@page "/submit"
+@page "/submit"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject WhistleblowerPlatform.Client.Services.CryptoService Crypto
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
+@implements IDisposable
 
 <div class="container mt-4" style="max-width: 720px;">
     <h2 class="mb-4">Submit a Report</h2>
@@ -94,7 +97,7 @@
         </div>
     </div>
 
-    <button class="btn btn-primary btn-lg w-100" @onclick="HandleSubmit" disabled="@isSubmitting">
+    <button class="btn btn-primary btn-lg w-100" @onclick="HandleSubmitClick" disabled="@isSubmitting">
         @if (isSubmitting)
         {
             <span class="spinner-border spinner-border-sm me-2"></span>
@@ -107,7 +110,62 @@
     </button>
 </div>
 
+<!-- CAPTCHA Verification Modal -->
+<div class="modal fade" id="captchaModal" tabindex="-1" aria-labelledby="captchaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="captchaModalLabel">Verify You're Human</h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">
+                    Please complete this verification to prevent automated submissions.
+                </p>
+                
+                <div class="d-flex justify-content-center">
+                    <div class="h-captcha" 
+                         data-sitekey="@hCaptchaSiteKey"
+                         data-callback="onCaptchaSuccess"
+                         data-expired-callback="onCaptchaExpired"
+                         data-error-callback="onCaptchaError">
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(captchaError))
+                {
+                    <div class="alert alert-danger mt-3 mb-0" role="alert">
+                        @captchaError
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        @onclick="HandleCancelCaptcha"
+                        disabled="@isProcessingCaptcha">
+                    Cancel
+                </button>
+                <button type="button" 
+                        class="btn btn-primary" 
+                        @onclick="HandleCaptchaSubmit"
+                        disabled="@(!isCaptchaSolved || isProcessingCaptcha)">
+                    @if (isProcessingCaptcha)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        <span>Continue</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
+    // Existing fields
     private List<CategoryDto>? categories;
     private string? selectedCategoryId;
     private string reportText = "";
@@ -124,8 +182,24 @@
     private const long MaxTotalSize = 5L * 1024 * 1024 * 1024;      // 5 GB
     private const long MaxFileReadSize = 1L * 1024 * 1024 * 1024;   // for ReadAsync buffer
 
+    // NEW: CAPTCHA-related fields
+    private string hCaptchaSiteKey = string.Empty;
+    private bool isCaptchaSolved = false;
+    private bool isProcessingCaptcha = false;
+    private string? captchaToken = null;
+    private string? captchaError = null;
+    private DotNetObjectReference<SubmitReport>? dotNetHelper;
+
     protected override async Task OnInitializedAsync()
     {
+        // NEW: Load hCaptcha site key from configuration
+        hCaptchaSiteKey = Configuration["HCaptcha:SiteKey"]
+            ?? throw new InvalidOperationException("HCaptcha:SiteKey not configured");
+
+        // NEW: Create DotNet reference for JS callbacks
+        dotNetHelper = DotNetObjectReference.Create(this);
+
+        // Existing: Load categories
         try
         {
             categories = await Http.GetFromJsonAsync<List<CategoryDto>>("api/reports/categories");
@@ -136,50 +210,137 @@
         }
     }
 
-    private void OnFilesSelected(InputFileChangeEventArgs e)
+    // NEW: Register callback for hCaptcha
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        fileError = null;
-
-        foreach (var file in e.GetMultipleFiles(20))
+        if (firstRender && dotNetHelper != null)
         {
-            // Check individual file size
-            if (file.Size > MaxFileSize)
-            {
-                fileError = $"'{file.Name}' exceeds the 1 GB file size limit.";
-                continue;
-            }
-
-            // Check total size
-            var currentTotal = selectedFiles.Sum(f => f.Size) + file.Size;
-            if (currentTotal > MaxTotalSize)
-            {
-                fileError = "Total attachments would exceed the 5 GB limit.";
-                break;
-            }
-
-            // Avoid duplicates
-            if (!selectedFiles.Any(f => f.Name == file.Name && f.Size == file.Size))
-            {
-                selectedFiles.Add(file);
-            }
+            // Register the callback reference for hCaptcha
+            await JS.InvokeVoidAsync("registerBlazorCaptchaCallback", dotNetHelper);
         }
     }
 
-    private void RemoveFile(IBrowserFile file)
+    // NEW: CAPTCHA callback methods
+    [JSInvokable]
+    public void OnCaptchaSuccess(string token)
     {
-        selectedFiles.Remove(file);
-        fileError = null;
+        captchaToken = token;
+        isCaptchaSolved = true;
+        captchaError = null;
+        StateHasChanged();
     }
 
-    private string FormatFileSize(long bytes)
+    [JSInvokable]
+    public void OnCaptchaExpired()
     {
-        if (bytes < 1024) return $"{bytes} B";
-        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
-        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
-        return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
+        captchaToken = null;
+        isCaptchaSolved = false;
+        captchaError = "CAPTCHA expired. Please solve it again.";
+        StateHasChanged();
     }
 
-    private async Task HandleSubmit()
+    [JSInvokable]
+    public void OnCaptchaError()
+    {
+        captchaToken = null;
+        isCaptchaSolved = false;
+        captchaError = "CAPTCHA error occurred. Please try again.";
+        StateHasChanged();
+    }
+
+    // NEW: Handle submit button click → Show CAPTCHA modal
+    private async Task HandleSubmitClick()
+    {
+        try
+        {
+            // Validate form BEFORE showing CAPTCHA
+            if (string.IsNullOrWhiteSpace(selectedCategoryId))
+            {
+                errorMessage = "Please select a report category";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(reportText))
+            {
+                errorMessage = "Please enter your report details.";
+                return;
+            }
+
+            // Validate file sizes
+            var totalSize = selectedFiles.Sum(f => f.Size);
+            if (selectedFiles.Any(f => f.Size > MaxFileSize))
+            {
+                errorMessage = "Individual files cannot exceed 1GB";
+                return;
+            }
+            if (totalSize > MaxTotalSize)
+            {
+                errorMessage = $"Total attachments cannot exceed 5GB (current: {FormatFileSize(totalSize)})";
+                return;
+            }
+
+            // Form is valid → Show CAPTCHA modal
+            captchaError = null;
+            isCaptchaSolved = false;
+            captchaToken = null;
+            await JS.InvokeVoidAsync("hCaptchaInterop.showModal");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    // NEW: Handle "Continue" button in modal → Process submission
+    private async Task HandleCaptchaSubmit()
+    {
+        if (!isCaptchaSolved || string.IsNullOrEmpty(captchaToken))
+        {
+            captchaError = "Please complete the CAPTCHA verification";
+            return;
+        }
+
+        try
+        {
+            isProcessingCaptcha = true;
+            isSubmitting = true;
+
+            // Close the modal
+            await JS.InvokeVoidAsync("hCaptchaInterop.hideModal");
+
+            // Proceed with encryption and submission
+            await ProcessReportSubmission();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Submission failed: {ex.Message}";
+            isProcessingCaptcha = false;
+            isSubmitting = false;
+            
+            // Reset CAPTCHA for retry
+            await ResetCaptcha();
+        }
+    }
+
+    // NEW: Handle "Cancel" button in modal
+    private async Task HandleCancelCaptcha()
+    {
+        await JS.InvokeVoidAsync("hCaptchaInterop.hideModal");
+        await ResetCaptcha();
+    }
+
+    // NEW: Reset CAPTCHA state
+    private async Task ResetCaptcha()
+    {
+        captchaToken = null;
+        isCaptchaSolved = false;
+        captchaError = null;
+        await JS.InvokeVoidAsync("hCaptchaInterop.reset");
+    }
+
+    // RENAMED: HandleSubmit → ProcessReportSubmission
+    // This is the existing encryption logic with CAPTCHA token added
+    private async Task ProcessReportSubmission()
     {
         // =================================================
         // WE NEED TO CREATE A HASH OF JAVASCRIPT FILE TO COMPARE TO BEFORE WE PROCEED WITH ENCRYPTION
@@ -187,18 +348,12 @@
         //==================================================
         errorMessage = null;
 
-        if (string.IsNullOrWhiteSpace(reportText))
-        {
-            errorMessage = "Please enter your report details.";
-            return;
-        }
-
-        isSubmitting = true;
-
         try
         {
+            isSubmitting = true;
+
             // ==========================================================
-            // STEP 1: Generate token and hash it
+            // STEP 1: Generate token
             // ==========================================================
             submitStatus = "Generating secure token...";
             StateHasChanged();
@@ -209,16 +364,16 @@
             // ==========================================================
             // STEP 2: Generate WB keypair
             // ==========================================================
-            submitStatus = "Generating encryption keys (this may take a moment)...";
+            submitStatus = "Generating encryption keys...";
             StateHasChanged();
 
             var wbKeypair = await Crypto.GenerateKeypairAsync();
+            var wbKeySalt = Convert.ToBase64String(
+    System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
 
             // ==========================================================
-            // STEP 3: Encrypt WB private key with wrapping key
+            // STEP 3: Encrypt WB private key with token-derived wrapping key
             // ==========================================================
-            var wbKeySalt = Convert.ToBase64String(
-                System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
             var wrappingKey = await Crypto.HashTokenAsync(token);
             var encryptedWbPrivateKey = await Crypto.EncryptPrivateKeyAsync(
                 wbKeypair.PrivateKey, wrappingKey);
@@ -341,7 +496,7 @@
             }
 
             // ==========================================================
-            // STEP 8: Build and send payload
+            // STEP 8: Build and send payload (WITH CAPTCHA TOKEN)
             // ==========================================================
             submitStatus = "Submitting encrypted report...";
             StateHasChanged();
@@ -367,7 +522,8 @@
                 selfIdentified = selfIdentified,
                 encryptedIdentity = encryptedIdentityPayload,
                 encryptedIdentityKeyEnvelope = identityKeyEnvelopePayload,
-                attachments = encryptedAttachments
+                attachments = encryptedAttachments,
+                hCaptchaToken = captchaToken  // NEW: Add CAPTCHA token
             };
 
             var response = await Http.PostAsJsonAsync("api/reports", payload);
@@ -375,24 +531,86 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<SubmitResultDto>();
+                
+                // Reset CAPTCHA before navigation
+                await ResetCaptcha();
+                
                 Navigation.NavigateTo($"/token/{result?.CaseNumber}/{Uri.EscapeDataString(token)}");
             }
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Submission failed: {error}";
+                
+                // Reset CAPTCHA for retry
+                await ResetCaptcha();
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"An error occurred: {ex.Message}";
+            
+            // Reset CAPTCHA for retry
+            await ResetCaptcha();
         }
         finally
         {
             isSubmitting = false;
+            isProcessingCaptcha = false;
         }
     }
 
+    // Existing helper methods (unchanged)
+    private void OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        fileError = null;
+
+        foreach (var file in e.GetMultipleFiles(20))
+        {
+            // Check individual file size
+            if (file.Size > MaxFileSize)
+            {
+                fileError = $"'{file.Name}' exceeds the 1 GB file size limit.";
+                continue;
+            }
+
+            // Check total size
+            var currentTotal = selectedFiles.Sum(f => f.Size) + file.Size;
+            if (currentTotal > MaxTotalSize)
+            {
+                fileError = "Total attachments would exceed the 5 GB limit.";
+                break;
+            }
+
+            // Avoid duplicates
+            if (!selectedFiles.Any(f => f.Name == file.Name && f.Size == file.Size))
+            {
+                selectedFiles.Add(file);
+            }
+        }
+    }
+
+    private void RemoveFile(IBrowserFile file)
+    {
+        selectedFiles.Remove(file);
+        fileError = null;
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
+        return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
+    }
+
+    // NEW: Dispose method
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+
+    // DTOs (unchanged)
     private class CategoryDto
     {
         public int CategoryId { get; set; }
