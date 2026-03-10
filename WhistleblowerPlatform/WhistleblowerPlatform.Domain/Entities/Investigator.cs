@@ -15,9 +15,13 @@ public partial class Investigator
 
     public bool Mfaenabled { get; set; }
 
-    public byte[] PublicKey { get; set; } = null!;
+    public byte[]? PublicKey { get; set; }
 
-    public byte[] EncryptedPrivateKey { get; set; } = null!;
+    public byte[]? EncryptedPrivateKey { get; set; }
+
+    public byte[]? PrivateKeySalt { get; set; }
+
+    public byte[]? PrivateKeyIv { get; set; }
 
     public bool IsActive { get; set; }
 

@@ -170,6 +170,44 @@ window.cryptoService = {
         };
     },
 
+    // Derive 256-bit AES wrapping key from password via Argon2id
+    // Returns base64 of derived key bytes
+    deriveWrappingKey: async function (password, saltBase64) {
+        const salt = this._fromBase64(saltBase64);
+        const result = await argon2.hash({
+            pass: password,
+            salt: salt,
+            type: argon2.ArgonType.Argon2id,
+            mem: 65536,       // 64 MB
+            time: 3,
+            parallelism: 4,
+            hashLen: 32
+        });
+        return this._toBase64(result.hash);
+    },
+
+    // Encrypt PKCS8 private key with AES-256-GCM wrapping key
+    // Returns { iv: base64(12 bytes), encryptedKey: base64(ciphertext+authTag) }
+    wrapPrivateKey: async function (privateKeyBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const plaintext = this._fromBase64(privateKeyBase64);
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+        return {
+            iv: this._toBase64(iv),
+            encryptedKey: this._toBase64(new Uint8Array(encrypted))
+        };
+    },
+
+    // Decrypt PKCS8 private key — returns base64 of plaintext key bytes
+    unwrapPrivateKey: async function (encryptedKeyBase64, ivBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = this._fromBase64(ivBase64);
+        const ciphertext = this._fromBase64(encryptedKeyBase64);
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
     // ---- Helper functions ----
 
     _importAesKey: async function (keyBase64) {

@@ -1,0 +1,125 @@
+@page "/investigator/setup-keypair"
+@using System.Security.Cryptography
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject CryptoService CryptoService
+@inject InvestigatorKeyService KeyService
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <h3>Setup Encryption Keypair</h3>
+
+        @if (!_setupComplete)
+        {
+            <div class="alert alert-info">
+                <h5>First-Time Setup Required</h5>
+                <p>Before you can access reports, your encryption keypair must be generated.</p>
+                <ul>
+                    <li>Your keypair is generated entirely in your browser</li>
+                    <li>Your private key is encrypted with your password before leaving your device</li>
+                    <li>The server never sees your plaintext private key</li>
+                </ul>
+            </div>
+
+            @if (!_generating)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Confirm Your Password</label>
+                    <input type="password" class="form-control" @bind="_password"
+                           placeholder="Enter your login password" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+
+                <button class="btn btn-primary" @onclick="GenerateAndSave"
+                        disabled="@string.IsNullOrEmpty(_password)">
+                    Generate Keypair
+                </button>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <strong>Generating keypair — this may take a few seconds, please wait...</strong>
+                    <div class="progress mt-2" style="height: 8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-success">
+                <h5>Keypair Setup Complete</h5>
+                <p>Your encryption keypair has been generated and saved. Redirecting...</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string _password = "";
+    private bool _generating = false;
+    private bool _setupComplete = false;
+    private string _error = "";
+
+    private async Task GenerateAndSave()
+    {
+        _error = "";
+        _generating = true;
+
+        try
+        {
+            // Step 1: Generate RSA-OAEP 4096-bit keypair
+            var keypair = await CryptoService.GenerateKeypairAsync();
+
+            // Step 2: Generate 16-byte salt
+            var saltBytes = RandomNumberGenerator.GetBytes(16);
+            var saltBase64 = Convert.ToBase64String(saltBytes);
+
+            // Step 3: Derive wrapping key from password via Argon2id
+            var wrappingKey = await CryptoService.DeriveWrappingKeyAsync(_password, saltBase64);
+
+            // Step 4: Encrypt private key
+            var wrapped = await CryptoService.WrapPrivateKeyAsync(keypair.PrivateKey, wrappingKey);
+
+            // Step 5: Build request (JS returns base64; .NET JSON auto-deserializes base64 → byte[])
+            var request = new SetupKeypairRequest
+            {
+                PublicKey = Convert.FromBase64String(keypair.PublicKey),
+                EncryptedPrivateKey = Convert.FromBase64String(wrapped.EncryptedKey),
+                PrivateKeySalt = saltBytes,
+                PrivateKeyIv = Convert.FromBase64String(wrapped.Iv)
+            };
+
+            // Step 6: Save to server
+            var success = await AuthService.SetupKeypairAsync(request);
+            if (!success)
+            {
+                _error = "Failed to save keypair. Please try again.";
+                return;
+            }
+
+            // Step 7: Store private key in memory
+            KeyService.SetPrivateKey(keypair.PrivateKey);
+
+            // Clear password from memory
+            _password = "";
+            _setupComplete = true;
+
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/investigator/login-successful");
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _generating = false;
+        }
+    }
+}

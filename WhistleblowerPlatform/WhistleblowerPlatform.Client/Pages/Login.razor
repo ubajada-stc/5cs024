@@ -1,0 +1,118 @@
+@page "/login"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject CryptoService CryptoService
+@inject InvestigatorKeyService KeyService
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h3>Investigator Login</h3>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" @bind="_email" disabled="@_loading" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" @bind="_password" disabled="@_loading" />
+        </div>
+
+        @if (_showMfa)
+        {
+            <div class="mb-3">
+                <label class="form-label">Authenticator Code</label>
+                <input type="text" class="form-control" @bind="_totpCode"
+                       placeholder="6-digit code" maxlength="6" disabled="@_loading" />
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <button class="btn btn-primary w-100" @onclick="HandleLogin" disabled="@_loading">
+            @(_loading ? "Please wait..." : "Login")
+        </button>
+    </div>
+</div>
+
+@code {
+    private string _email = "";
+    private string _password = "";
+    private string _totpCode = "";
+    private bool _showMfa = false;
+    private bool _loading = false;
+    private string _error = "";
+
+    private async Task HandleLogin()
+    {
+        _error = "";
+        _loading = true;
+
+        try
+        {
+            var request = new LoginRequest
+            {
+                Email = _email,
+                Password = _password,
+                TotpCode = _showMfa ? _totpCode : null
+            };
+
+            var response = await AuthService.LoginAsync(request);
+
+            if (response.RequiresMfa)
+            {
+                _showMfa = true;
+                return;
+            }
+
+            if (!response.Success)
+            {
+                _error = response.Error ?? "Login failed.";
+                return;
+            }
+
+            // Check whether this investigator already has a keypair
+            var hasKeypair = await AuthService.HasKeypairAsync();
+
+            if (!hasKeypair)
+            {
+                Navigation.NavigateTo("/investigator/setup-keypair");
+                return;
+            }
+
+            // Fetch and decrypt the private key while the password is still in memory
+            var encryptedKey = await AuthService.GetEncryptedKeyAsync();
+            if (encryptedKey is null)
+            {
+                _error = "Could not fetch your encryption key. Please contact support.";
+                return;
+            }
+
+            var saltBase64 = Convert.ToBase64String(encryptedKey.Salt);
+            var ivBase64 = Convert.ToBase64String(encryptedKey.Iv);
+            var encryptedKeyBase64 = Convert.ToBase64String(encryptedKey.EncryptedPrivateKey);
+
+            var wrappingKey = await CryptoService.DeriveWrappingKeyAsync(_password, saltBase64);
+            var privateKeyBase64 = await CryptoService.UnwrapPrivateKeyAsync(encryptedKeyBase64, ivBase64, wrappingKey);
+
+            KeyService.SetPrivateKey(privateKeyBase64);
+
+            // Clear password from memory before navigating
+            _password = "";
+
+            Navigation.NavigateTo("/investigator/login-successful");
+        }
+        catch (Exception ex)
+        {
+            _error = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
