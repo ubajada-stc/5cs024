@@ -26,7 +26,7 @@
             {
                 <div class="mb-3">
                     <label class="form-label">Confirm Your Password</label>
-                    <input type="password" class="form-control" @bind="_password"
+                    <input type="password" class="form-control" @bind="_password" @bind:event="oninput"
                            placeholder="Enter your login password" />
                 </div>
 

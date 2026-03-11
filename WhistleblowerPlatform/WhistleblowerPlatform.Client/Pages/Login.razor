@@ -16,7 +16,7 @@
 
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" class="form-control" @bind="_password" disabled="@_loading" />
+            <input type="password" class="form-control" @bind="_password" @bind:event="oninput" disabled="@_loading" />
         </div>
 
         @if (_showMfa)

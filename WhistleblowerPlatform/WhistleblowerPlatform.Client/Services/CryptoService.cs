@@ -67,6 +67,22 @@ public class CryptoService
     public async Task<string> UnwrapPrivateKeyAsync(string encryptedKeyBase64, string ivBase64, string wrappingKeyBase64)
         => await _js.InvokeAsync<string>("cryptoService.unwrapPrivateKey", encryptedKeyBase64, ivBase64, wrappingKeyBase64);
 
+    /// <summary>Decrypt data with RSA-OAEP private key — returns base64 of plaintext</summary>
+    public async Task<string> DecryptWithPrivateKeyAsync(string encryptedBase64, string privateKeyBase64)
+        => await _js.InvokeAsync<string>("cryptoService.decryptWithPrivateKey", encryptedBase64, privateKeyBase64);
+
+    /// <summary>Decrypt AES-256-GCM — returns base64 of plaintext bytes</summary>
+    public async Task<string> DecryptSymmetricAsync(string ivBase64, string ciphertextBase64, string authTagBase64, string keyBase64)
+        => await _js.InvokeAsync<string>("cryptoService.decryptSymmetric", ivBase64, ciphertextBase64, authTagBase64, keyBase64);
+
+    /// <summary>Decrypt a file attachment payload — returns { FileName, ContentBase64 }</summary>
+    public async Task<DecryptedFileResult> DecryptFileAttachmentAsync(string ivBase64, string ciphertextBase64, string authTagBase64, string keyEnvelopeBase64, string privateKeyBase64)
+        => await _js.InvokeAsync<DecryptedFileResult>("cryptoService.decryptFileAttachment", ivBase64, ciphertextBase64, authTagBase64, keyEnvelopeBase64, privateKeyBase64);
+
+    /// <summary>Trigger a browser file download</summary>
+    public async Task DownloadFileAsync(string contentBase64, string fileName, string mimeType)
+        => await _js.InvokeVoidAsync("cryptoService.downloadFile", contentBase64, fileName, mimeType);
+
     public async Task<DualEncryptedFileResult> EncryptFileForSanitizationAsync(
     string fileContentBase64, string fileNameBase64,
     string investigatorPublicKeyBase64, string wbPublicKeyBase64)
@@ -99,6 +115,12 @@ public class WrappedKeyResult
 {
     public string Iv { get; set; } = "";
     public string EncryptedKey { get; set; } = "";
+}
+
+public class DecryptedFileResult
+{
+    public string FileName { get; set; } = "";
+    public string ContentBase64 { get; set; } = "";
 }
 
 public class DualEncryptedFileResult

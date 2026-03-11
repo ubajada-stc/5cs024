@@ -49,7 +49,21 @@ public class AuthService
         return resp.IsSuccessStatusCode;
     }
 
-    public void Logout() => AccessToken = null;
+    public async Task LogoutAsync()
+    {
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Post, "/api/auth/logout");
+            if (AccessToken != null)
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+            await _http.SendAsync(req);
+        }
+        catch { }
+        finally
+        {
+            AccessToken = null;
+        }
+    }
 }
 
 public class LoginRequest
