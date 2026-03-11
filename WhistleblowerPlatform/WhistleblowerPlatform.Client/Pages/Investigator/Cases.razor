@@ -1,0 +1,125 @@
+@page "/investigator/cases"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject InvestigatorKeyService KeyService
+@inject InvestigatorReportService ReportService
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+    <h3>Cases</h3>
+
+    @if (_loading)
+    {
+        <div class="alert alert-info">Loading cases...</div>
+    }
+    else if (_error != null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    else
+    {
+        <div class="mb-3 d-flex align-items-center gap-3">
+            <label class="form-label mb-0">Filter by status:</label>
+            <select class="form-select w-auto" @bind="_statusFilter">
+                <option value="-1">All</option>
+                <option value="0">Submitted</option>
+                <option value="1">Under Review</option>
+                <option value="2">Investigation In Progress</option>
+                <option value="3">Closed</option>
+            </select>
+            <span class="text-muted">@FilteredCases.Count case(s)</span>
+        </div>
+
+        @if (!FilteredCases.Any())
+        {
+            <div class="alert alert-secondary">No cases found.</div>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Case Number</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Ack Due</th>
+                        <th>Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in FilteredCases)
+                    {
+                        <tr style="cursor: pointer;" @onclick="() => OpenCase(c.CaseNumber)">
+                            <td><strong>@c.CaseNumber</strong></td>
+                            <td>@(c.CategoryName ?? "—")</td>
+                            <td><span class="badge @StatusBadgeClass(c.Status)">@StatusLabel(c.Status)</span></td>
+                            <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td class="@(IsOverdue(c) ? "text-danger fw-bold" : "")">
+                                @c.AcknowledgementDueAt.ToString("dd MMM yyyy")
+                                @if (c.IsAcknowledged) { <span class="text-success ms-1">✓</span> }
+                            </td>
+                            <td>@c.AttachmentCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</div>
+
+@code {
+    private List<CaseListItem> _cases = new List<CaseListItem>();
+    private bool _loading = true;
+    private string? _error;
+    private int _statusFilter = -1;
+
+    private List<CaseListItem> FilteredCases =>
+        _statusFilter == -1 ? _cases : _cases.Where(c => c.Status == _statusFilter).ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(AuthService.AccessToken) || !KeyService.HasPrivateKey)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            _cases = await ReportService.GetCasesAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load cases: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OpenCase(string caseNumber) =>
+        Navigation.NavigateTo($"/investigator/cases/{Uri.EscapeDataString(caseNumber)}");
+
+    private static string StatusLabel(byte status) => status switch
+    {
+        0 => "Submitted",
+        1 => "Under Review",
+        2 => "In Progress",
+        3 => "Closed",
+        _ => "Unknown"
+    };
+
+    private static string StatusBadgeClass(byte status) => status switch
+    {
+        0 => "bg-secondary",
+        1 => "bg-info text-dark",
+        2 => "bg-warning text-dark",
+        3 => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    private static bool IsOverdue(CaseListItem c) =>
+        !c.IsAcknowledged && c.AcknowledgementDueAt < DateTime.UtcNow;
+}

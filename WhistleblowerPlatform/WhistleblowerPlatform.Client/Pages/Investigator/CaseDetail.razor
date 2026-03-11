@@ -1,0 +1,336 @@
+@page "/investigator/cases/{CaseNumber}"
+@using System.Text
+@using System.Text.Json
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject InvestigatorKeyService KeyService
+@inject InvestigatorReportService ReportService
+@inject CryptoService CryptoService
+@inject NavigationManager Navigation
+
+<div class="container mt-4" style="max-width: 860px;">
+
+    <a href="/investigator/cases" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Cases</a>
+
+    @if (_loading)
+    {
+        <div class="alert alert-info">Loading case...</div>
+    }
+    else if (_error != null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    else if (_case != null)
+    {
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h3 class="mb-0">@_case.CaseNumber</h3>
+            <span class="badge @StatusBadgeClass(_case.Status) fs-6">@StatusLabel(_case.Status)</span>
+        </div>
+
+        <div class="row mb-3 text-muted small">
+            <div class="col-auto">Category: <strong>@(_case.CategoryName ?? "—")</strong></div>
+            <div class="col-auto">Submitted: <strong>@_case.CreatedAt.ToString("dd MMM yyyy HH:mm")</strong></div>
+            <div class="col-auto">Ack Due: <strong class="@(IsAckOverdue() ? "text-danger" : "")">@_case.AcknowledgementDueAt.ToString("dd MMM yyyy")</strong></div>
+            @if (_case.IsAcknowledged) { <div class="col-auto text-success">✓ Acknowledged</div> }
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Report Content</div>
+            <div class="card-body">
+                @if (_decryptingReport)
+                {
+                    <div class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Decrypting...</div>
+                }
+                else if (_reportText != null)
+                {
+                    <pre style="white-space: pre-wrap; word-break: break-word;">@_reportText</pre>
+                }
+                else if (_decryptError != null)
+                {
+                    <div class="alert alert-danger mb-0">Decryption failed: @_decryptError</div>
+                }
+            </div>
+        </div>
+
+        @if (_case.SelfIdentified)
+        {
+            <div class="card mb-4">
+                <div class="card-header">Reporter Identity</div>
+                <div class="card-body">
+                    @if (_decryptingIdentity)
+                    {
+                        <div class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Decrypting identity...</div>
+                    }
+                    else if (_identity != null)
+                    {
+                        @if (!string.IsNullOrEmpty(GetIdentityField("name")))
+                        {
+                            <div><strong>Name:</strong> @GetIdentityField("name")</div>
+                        }
+                        @if (!string.IsNullOrEmpty(GetIdentityField("email")))
+                        {
+                            <div><strong>Email:</strong> @GetIdentityField("email")</div>
+                        }
+                        @if (!string.IsNullOrEmpty(GetIdentityField("phone")))
+                        {
+                            <div><strong>Phone:</strong> @GetIdentityField("phone")</div>
+                        }
+                    }
+                    else if (_identityError != null)
+                    {
+                        <div class="alert alert-danger mb-0">Identity decryption failed: @_identityError</div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (_case.Attachments.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header">Attachments (@_case.Attachments.Count)</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Sanitization</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var att in _case.Attachments)
+                            {
+                                <tr>
+                                    <td>@att.FileName</td>
+                                    <td><small>@att.MimeType</small></td>
+                                    <td><small>@FormatSize(att.FileSize)</small></td>
+                                    <td><span class="badge @SanitizationBadgeClass(att.SanitizationStatus)" title="@att.SanitizationError">@SanitizationBadgeText(att.SanitizationStatus)</span></td>
+                                    <td>
+                                        @if (att.SanitizationStatus == 0 || att.SanitizationStatus == 1)
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" disabled>Pending</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    disabled="@(_downloadingId == att.AttachmentId)"
+                                                    @onclick="() => DownloadAttachment(att)">
+                                                @if (_downloadingId == att.AttachmentId)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                                }
+                                                Download & Decrypt
+                                            </button>
+                                        }
+                                        @if (_downloadErrors.TryGetValue(att.AttachmentId, out var dlErr))
+                                        {
+                                            <div class="text-danger small mt-1">@dlErr</div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string CaseNumber { get; set; } = "";
+
+    private CaseDetailModel? _case;
+    private bool _loading = true;
+    private string? _error;
+
+    private bool _decryptingReport = false;
+    private string? _reportText;
+    private string? _decryptError;
+
+    private bool _decryptingIdentity = false;
+    private JsonElement? _identity;
+    private string? _identityError;
+
+    private Guid? _downloadingId;
+    private Dictionary<Guid, string> _downloadErrors = new Dictionary<Guid, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(AuthService.AccessToken) || !KeyService.HasPrivateKey)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            _case = await ReportService.GetCaseDetailAsync(CaseNumber);
+            if (_case == null)
+            {
+                _error = "Case not found.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load case: {ex.Message}";
+            return;
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+        await DecryptReportAsync();
+
+        if (_case.SelfIdentified)
+            await DecryptIdentityAsync();
+    }
+
+    private async Task DecryptReportAsync()
+    {
+        _decryptingReport = true;
+        StateHasChanged();
+        try
+        {
+            var privateKey = KeyService.PrivateKeyBase64!;
+            var json = Encoding.UTF8.GetString(_case!.EncryptedContent);
+            var enc = JsonSerializer.Deserialize<EncryptedDataModel>(json);
+            if (enc == null) throw new Exception("Invalid encrypted content format.");
+
+            var keyEnvelopeBase64 = Convert.ToBase64String(_case.EncryptedKeyEnvelope);
+            var symmetricKey = await CryptoService.DecryptWithPrivateKeyAsync(keyEnvelopeBase64, privateKey);
+            var plaintextBase64 = await CryptoService.DecryptSymmetricAsync(enc.Iv, enc.Ciphertext, enc.AuthTag, symmetricKey);
+            _reportText = Encoding.UTF8.GetString(Convert.FromBase64String(plaintextBase64));
+        }
+        catch (Exception ex)
+        {
+            _decryptError = ex.Message;
+        }
+        finally
+        {
+            _decryptingReport = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DecryptIdentityAsync()
+    {
+        if (_case!.EncryptedIdentity == null || _case.EncryptedIdentityKeyEnvelope == null) return;
+
+        _decryptingIdentity = true;
+        StateHasChanged();
+        try
+        {
+            var privateKey = KeyService.PrivateKeyBase64!;
+            var json = Encoding.UTF8.GetString(_case.EncryptedIdentity);
+            var enc = JsonSerializer.Deserialize<EncryptedDataModel>(json);
+            if (enc == null) throw new Exception("Invalid encrypted identity format.");
+
+            var keyEnvelopeBase64 = Convert.ToBase64String(_case.EncryptedIdentityKeyEnvelope);
+            var identityKey = await CryptoService.DecryptWithPrivateKeyAsync(keyEnvelopeBase64, privateKey);
+            var plaintextBase64 = await CryptoService.DecryptSymmetricAsync(enc.Iv, enc.Ciphertext, enc.AuthTag, identityKey);
+            var identityJson = Encoding.UTF8.GetString(Convert.FromBase64String(plaintextBase64));
+            _identity = JsonSerializer.Deserialize<JsonElement>(identityJson);
+        }
+        catch (Exception ex)
+        {
+            _identityError = ex.Message;
+        }
+        finally
+        {
+            _decryptingIdentity = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DownloadAttachment(AttachmentModel att)
+    {
+        _downloadingId = att.AttachmentId;
+        _downloadErrors.Remove(att.AttachmentId);
+        StateHasChanged();
+        try
+        {
+            var blob = await ReportService.GetAttachmentBlobAsync(CaseNumber, att.AttachmentId);
+            if (blob == null) throw new Exception("Failed to fetch attachment.");
+
+            var privateKey = KeyService.PrivateKeyBase64!;
+            var result = await CryptoService.DecryptFileAttachmentAsync(
+                blob.Iv, blob.Ciphertext, blob.AuthTag, blob.EncryptedKeyEnvelope, privateKey);
+
+            await CryptoService.DownloadFileAsync(result.ContentBase64, result.FileName, att.MimeType);
+        }
+        catch (Exception ex)
+        {
+            _downloadErrors[att.AttachmentId] = ex.Message;
+        }
+        finally
+        {
+            _downloadingId = null;
+            StateHasChanged();
+        }
+    }
+
+    private string? GetIdentityField(string key)
+    {
+        if (_identity == null) return null;
+        return _identity.Value.TryGetProperty(key, out var el) ? el.GetString() : null;
+    }
+
+    private bool IsAckOverdue() =>
+        !(_case?.IsAcknowledged ?? true) && (_case?.AcknowledgementDueAt ?? DateTime.MaxValue) < DateTime.UtcNow;
+
+    private static string StatusLabel(byte status) => status switch
+    {
+        0 => "Submitted",
+        1 => "Under Review",
+        2 => "In Progress",
+        3 => "Closed",
+        _ => "Unknown"
+    };
+
+    private static string StatusBadgeClass(byte status) => status switch
+    {
+        0 => "bg-secondary",
+        1 => "bg-info text-dark",
+        2 => "bg-warning text-dark",
+        3 => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    private static string SanitizationBadgeClass(byte status) => status switch
+    {
+        1 => "bg-info text-dark",
+        2 => "bg-success",
+        3 => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+
+    private static string SanitizationBadgeText(byte status) => status switch
+    {
+        0 => "Queued",
+        1 => "Processing",
+        2 => "Clean",
+        3 => "⚠ Failed",
+        4 => "Skipped",
+        _ => "Unknown"
+    };
+
+    private static string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
+        return $"{bytes / (1024.0 * 1024 * 1024):F1} GB";
+    }
+
+    private class EncryptedDataModel
+    {
+        public string Iv { get; set; } = "";
+        public string Ciphertext { get; set; } = "";
+        public string AuthTag { get; set; } = "";
+    }
+}

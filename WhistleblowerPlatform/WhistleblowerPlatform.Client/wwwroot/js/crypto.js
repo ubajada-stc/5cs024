@@ -170,6 +170,110 @@ window.cryptoService = {
         };
     },
 
+    // Derive 256-bit AES wrapping key from password via Argon2id
+    // Returns base64 of derived key bytes
+    deriveWrappingKey: async function (password, saltBase64) {
+        const salt = this._fromBase64(saltBase64);
+        const result = await argon2.hash({
+            pass: password,
+            salt: salt,
+            type: argon2.ArgonType.Argon2id,
+            mem: 65536,       // 64 MB
+            time: 3,
+            parallelism: 4,
+            hashLen: 32
+        });
+        return this._toBase64(result.hash);
+    },
+
+    // Encrypt PKCS8 private key with AES-256-GCM wrapping key
+    // Returns { iv: base64(12 bytes), encryptedKey: base64(ciphertext+authTag) }
+    wrapPrivateKey: async function (privateKeyBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const plaintext = this._fromBase64(privateKeyBase64);
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+        return {
+            iv: this._toBase64(iv),
+            encryptedKey: this._toBase64(new Uint8Array(encrypted))
+        };
+    },
+
+    // Decrypt PKCS8 private key — returns base64 of plaintext key bytes
+    unwrapPrivateKey: async function (encryptedKeyBase64, ivBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = this._fromBase64(ivBase64);
+        const ciphertext = this._fromBase64(encryptedKeyBase64);
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt data with RSA-OAEP private key — returns base64 of plaintext
+    decryptWithPrivateKey: async function (encryptedBase64, privateKeyBase64) {
+        const privateKey = await crypto.subtle.importKey(
+            "pkcs8",
+            this._fromBase64(privateKeyBase64),
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            false,
+            ["decrypt"]
+        );
+        const decrypted = await crypto.subtle.decrypt(
+            { name: "RSA-OAEP" },
+            privateKey,
+            this._fromBase64(encryptedBase64)
+        );
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt AES-256-GCM — returns base64 of plaintext bytes
+    decryptSymmetric: async function (ivBase64, ciphertextBase64, authTagBase64, keyBase64) {
+        const key = await this._importAesKey(keyBase64);
+        const ciphertext = this._fromBase64(ciphertextBase64);
+        const authTag = this._fromBase64(authTagBase64);
+        const combined = new Uint8Array(ciphertext.length + authTag.length);
+        combined.set(ciphertext);
+        combined.set(authTag, ciphertext.length);
+        const decrypted = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: this._fromBase64(ivBase64) },
+            key,
+            combined
+        );
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt a file attachment — returns { fileName, contentBase64 }
+    // Handles both pre-sanitization (camelCase keys, base64-encoded fileName)
+    // and post-sanitization (PascalCase keys, plain fileName) payload formats.
+    decryptFileAttachment: async function (ivBase64, ciphertextBase64, authTagBase64, keyEnvelopeBase64, privateKeyBase64) {
+        const symmetricKey = await this.decryptWithPrivateKey(keyEnvelopeBase64, privateKeyBase64);
+        const payloadBase64 = await this.decryptSymmetric(ivBase64, ciphertextBase64, authTagBase64, symmetricKey);
+        const payloadJson = new TextDecoder().decode(this._fromBase64(payloadBase64));
+        const payload = JSON.parse(payloadJson);
+        const rawFileName = payload.fileName ?? payload.FileName ?? "download";
+        let fileName;
+        try {
+            const decoded = new TextDecoder().decode(this._fromBase64(rawFileName));
+            fileName = /^[\x20-\x7E\u00A0-\uFFFF]+$/.test(decoded) ? decoded : rawFileName;
+        } catch {
+            fileName = rawFileName;
+        }
+        return { fileName, contentBase64: payload.content ?? payload.Content ?? "" };
+    },
+
+    // Trigger a browser file download
+    downloadFile: function (contentBase64, fileName, mimeType) {
+        const bytes = this._fromBase64(contentBase64);
+        const blob = new Blob([bytes], { type: mimeType || "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
     // ---- Helper functions ----
 
     _importAesKey: async function (keyBase64) {

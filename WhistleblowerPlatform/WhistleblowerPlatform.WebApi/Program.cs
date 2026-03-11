@@ -1,6 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WhistleblowerPlatform.Application.Interfaces;
 using WhistleblowerPlatform.Application.UseCases;
+using WhistleblowerPlatform.Domain.Entities;
 using WhistleblowerPlatform.Infrastructure;
 using WhistleblowerPlatform.Infrastructure.Persistence;
 using WhistleblowerPlatform.Infrastructure.Repositories;
@@ -17,8 +22,49 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WhistleblowerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Identity (AddIdentityCore avoids cookie auth scheme conflicts with JWT)
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Password.RequiredLength = 12;
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddRoles<IdentityRole<Guid>>()
+.AddEntityFrameworkStores<WhistleblowerDbContext>()
+.AddDefaultTokenProviders();
+
+// JWT
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+builder.Services.AddSingleton(jwtSettings);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+    };
+});
+builder.Services.AddAuthorization();
+
+// Auth services
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IMfaService, MfaService>();
+builder.Services.AddScoped<LoginUseCase>();
+
 // Repositories
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IInvestigatorRepository, InvestigatorRepository>();
 
 //BlobStorage
 var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "blob-storage");
@@ -65,6 +111,7 @@ app.UseStaticFiles(new StaticFileOptions
     ContentTypeProvider = provider
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

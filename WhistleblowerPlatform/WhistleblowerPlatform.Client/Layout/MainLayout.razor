@@ -1,12 +1,20 @@
 ﻿@inherits LayoutComponentBase
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject InvestigatorKeyService KeyService
+@inject NavigationManager Navigation
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center">
+            @if (AuthService.AccessToken != null)
+            {
+                <button class="btn btn-outline-secondary btn-sm" @onclick="HandleLogout">Logout</button>
+            }
         </div>
 
         <article class="content px-4">
@@ -14,3 +22,12 @@
         </article>
     </main>
 </div>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        KeyService.Clear();
+        Navigation.NavigateTo("/login");
+    }
+}

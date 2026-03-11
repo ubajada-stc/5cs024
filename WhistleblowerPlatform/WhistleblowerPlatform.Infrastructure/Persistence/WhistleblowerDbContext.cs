@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using WhistleblowerPlatform.Infrastructure;
 using WhistleblowerPlatform.Domain.Entities;
 
 namespace WhistleblowerPlatform.Infrastructure.Persistence;
 
-public partial class WhistleblowerDbContext : DbContext
+public partial class WhistleblowerDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public WhistleblowerDbContext(DbContextOptions<WhistleblowerDbContext> options)
         : base(options)
@@ -35,6 +34,20 @@ public partial class WhistleblowerDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // IMPORTANT: Call base method first - this sets up all Identity tables
+        base.OnModelCreating(modelBuilder);
+
+        // Configure the relationship between ApplicationUser and Investigator
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.HasOne(u => u.Investigator)
+                  .WithOne()
+                  .HasForeignKey<ApplicationUser>(u => u.InvestigatorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // All existing entity configurations below (unchanged)
+
         modelBuilder.Entity<Admin>(entity =>
         {
             entity.HasIndex(e => e.Email, "UQ_Admins_Email").IsUnique();
