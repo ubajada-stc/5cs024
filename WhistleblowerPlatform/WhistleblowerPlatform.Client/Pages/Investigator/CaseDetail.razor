@@ -136,6 +136,52 @@
                 </div>
             </div>
         }
+
+        <div class="card mb-4">
+            <div class="card-header">Messages</div>
+            <div class="card-body">
+                @if (!_case.Messages.Any())
+                {
+                    <p class="text-muted small">No messages yet.</p>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        @foreach (var msg in _case.Messages)
+                        {
+                            <div class="d-flex @(msg.SenderRole == 0 ? "justify-content-end" : "justify-content-start") mb-2">
+                                <div class="border rounded p-2 @(msg.SenderRole == 0 ? "bg-primary text-white" : "bg-light")" style="max-width: 75%;">
+                                    <div class="small fw-bold mb-1">@(msg.SenderRole == 0 ? "You" : "Whistleblower") · @msg.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                                    @if (_decryptedMessages.TryGetValue(msg.MessageId, out var msgText))
+                                    {
+                                        <div style="white-space: pre-wrap; word-break: break-word;">@msgText</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="small fst-italic text-opacity-75">Decrypting...</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                <textarea class="form-control mb-2" rows="3" placeholder="Type your reply..."
+                          @bind="_replyText" @bind:event="oninput"></textarea>
+                <button class="btn btn-primary btn-sm"
+                        @onclick="SendReply"
+                        disabled="@(_sendingReply || string.IsNullOrWhiteSpace(_replyText))">
+                    @if (_sendingReply)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Send Reply
+                </button>
+                @if (_replyError != null)
+                {
+                    <div class="alert alert-danger mt-2 mb-0 small">@_replyError</div>
+                }
+            </div>
+        </div>
     }
 </div>
 
@@ -156,6 +202,11 @@
 
     private Guid? _downloadingId;
     private Dictionary<Guid, string> _downloadErrors = new Dictionary<Guid, string>();
+
+    private Dictionary<Guid, string> _decryptedMessages = new Dictionary<Guid, string>();
+    private string _replyText = "";
+    private bool _sendingReply = false;
+    private string? _replyError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,6 +239,9 @@
 
         if (_case.SelfIdentified)
             await DecryptIdentityAsync();
+
+        if (_case.Messages.Any())
+            await DecryptMessagesAsync();
     }
 
     private async Task DecryptReportAsync()
@@ -270,6 +324,68 @@
         finally
         {
             _downloadingId = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DecryptMessagesAsync()
+    {
+        var privateKey = KeyService.PrivateKeyBase64!;
+        foreach (var msg in _case!.Messages)
+        {
+            try
+            {
+                var json = Encoding.UTF8.GetString(msg.EncryptedContent);
+                var enc = JsonSerializer.Deserialize<EncryptedDataModel>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (enc == null) continue;
+                var keyEnvelopeBase64 = Convert.ToBase64String(msg.EncryptedKeyEnvelope);
+                var symmetricKey = await CryptoService.DecryptWithPrivateKeyAsync(keyEnvelopeBase64, privateKey);
+                var plaintextBase64 = await CryptoService.DecryptSymmetricAsync(enc.Iv, enc.Ciphertext, enc.AuthTag, symmetricKey);
+                _decryptedMessages[msg.MessageId] = Encoding.UTF8.GetString(Convert.FromBase64String(plaintextBase64));
+            }
+            catch { /* skip undecryptable messages */ }
+        }
+        StateHasChanged();
+    }
+
+    private async Task SendReply()
+    {
+        _sendingReply = true;
+        _replyError = null;
+        StateHasChanged();
+        try
+        {
+            var investigatorPubKey = KeyService.PublicKeyBase64!;
+            var wbPubKey = Convert.ToBase64String(_case!.WbPublicKey);
+
+            var symmetricKey = await CryptoService.GenerateSymmetricKeyAsync();
+            var plaintextBase64 = await CryptoService.StringToBase64Async(_replyText);
+            var enc = await CryptoService.EncryptSymmetricAsync(plaintextBase64, symmetricKey);
+            var contentBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(enc));
+
+            var investigatorEnvelope = await CryptoService.EncryptWithPublicKeyAsync(symmetricKey, investigatorPubKey);
+            var wbEnvelope = await CryptoService.EncryptWithPublicKeyAsync(symmetricKey, wbPubKey);
+
+            var newMsg = await ReportService.SendReplyAsync(
+                CaseNumber,
+                contentBytes,
+                Convert.FromBase64String(investigatorEnvelope),
+                Convert.FromBase64String(wbEnvelope));
+
+            if (newMsg is null) throw new Exception("Server rejected the message.");
+
+            _case.Messages.Add(newMsg);
+            _decryptedMessages[newMsg.MessageId] = _replyText;
+            _replyText = "";
+        }
+        catch (Exception ex)
+        {
+            _replyError = ex.Message;
+        }
+        finally
+        {
+            _sendingReply = false;
             StateHasChanged();
         }
     }

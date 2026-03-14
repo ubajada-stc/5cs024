@@ -15,6 +15,8 @@ public partial class Message
 
     public byte[] EncryptedKeyEnvelope { get; set; } = null!;
 
+    public byte[]? WbkeyEnvelope { get; set; }
+
     public bool IsRead { get; set; }
 
     public DateTime CreatedAt { get; set; }

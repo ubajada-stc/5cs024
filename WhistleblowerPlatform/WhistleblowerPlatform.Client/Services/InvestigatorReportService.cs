@@ -41,6 +41,46 @@ public class InvestigatorReportService
         if (!resp.IsSuccessStatusCode) return null;
         return await resp.Content.ReadFromJsonAsync<AttachmentBlobModel>();
     }
+
+    public async Task<MessageModel?> SendReplyAsync(
+        string caseNumber, byte[] encryptedContent,
+        byte[] encryptedKeyEnvelope, byte[] wbKeyEnvelope)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/investigator/cases/{Uri.EscapeDataString(caseNumber)}/messages");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+        req.Content = JsonContent.Create(new SendMessagePayload
+        {
+            EncryptedContent = encryptedContent,
+            EncryptedKeyEnvelope = encryptedKeyEnvelope,
+            WbKeyEnvelope = wbKeyEnvelope
+        });
+        using var resp = await _http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode) return null;
+        var result = await resp.Content.ReadFromJsonAsync<NewMessageResponse>();
+        if (result is null) return null;
+        return new MessageModel
+        {
+            MessageId = result.MessageId,
+            SenderRole = 0,
+            EncryptedContent = encryptedContent,
+            EncryptedKeyEnvelope = encryptedKeyEnvelope,
+            CreatedAt = result.CreatedAt
+        };
+    }
+
+    private class SendMessagePayload
+    {
+        public byte[] EncryptedContent { get; set; } = [];
+        public byte[] EncryptedKeyEnvelope { get; set; } = [];
+        public byte[] WbKeyEnvelope { get; set; } = [];
+    }
+
+    private class NewMessageResponse
+    {
+        public Guid MessageId { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
 }
 
 public class CaseListItem
@@ -69,7 +109,18 @@ public class CaseDetailModel
     public byte[] EncryptedKeyEnvelope { get; set; } = [];
     public byte[]? EncryptedIdentity { get; set; }
     public byte[]? EncryptedIdentityKeyEnvelope { get; set; }
+    public byte[] WbPublicKey { get; set; } = [];
     public List<AttachmentModel> Attachments { get; set; } = [];
+    public List<MessageModel> Messages { get; set; } = new List<MessageModel>();
+}
+
+public class MessageModel
+{
+    public Guid MessageId { get; set; }
+    public byte SenderRole { get; set; }
+    public byte[] EncryptedContent { get; set; } = [];
+    public byte[] EncryptedKeyEnvelope { get; set; } = [];
+    public DateTime CreatedAt { get; set; }
 }
 
 public class AttachmentModel

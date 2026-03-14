@@ -103,8 +103,9 @@
                 return;
             }
 
-            // Step 7: Store private key in memory
+            // Step 7: Store private key and public key in memory
             KeyService.SetPrivateKey(keypair.PrivateKey);
+            KeyService.SetPublicKey(keypair.PublicKey);
 
             // Clear password from memory
             _password = "";

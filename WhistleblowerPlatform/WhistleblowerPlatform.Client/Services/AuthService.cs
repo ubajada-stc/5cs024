@@ -100,4 +100,5 @@ public class EncryptedKeyResponse
     public byte[] EncryptedPrivateKey { get; set; } = [];
     public byte[] Salt { get; set; } = [];
     public byte[] Iv { get; set; } = [];
+    public byte[]? PublicKey { get; set; }
 }

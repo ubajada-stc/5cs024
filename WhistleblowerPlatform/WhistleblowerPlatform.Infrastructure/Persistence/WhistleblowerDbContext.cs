@@ -115,6 +115,8 @@ public partial class WhistleblowerDbContext : IdentityDbContext<ApplicationUser,
 
             entity.Property(e => e.MessageId).ValueGeneratedNever();
 
+            entity.Property(e => e.WbkeyEnvelope).HasColumnName("WBKeyEnvelope");
+
             entity.HasOne(d => d.Report).WithMany(p => p.Messages)
                 .HasForeignKey(d => d.ReportId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

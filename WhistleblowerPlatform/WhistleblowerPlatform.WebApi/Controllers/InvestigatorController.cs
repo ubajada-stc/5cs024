@@ -79,7 +79,8 @@ public class InvestigatorController : ControllerBase
         {
             encryptedPrivateKey = investigator.EncryptedPrivateKey,
             salt = investigator.PrivateKeySalt,
-            iv = investigator.PrivateKeyIv
+            iv = investigator.PrivateKeyIv,
+            publicKey = investigator.PublicKey
         });
     }
 
@@ -121,6 +122,7 @@ public class InvestigatorController : ControllerBase
             .Where(r => r.CaseNumber == caseNumber && !r.IsDeleted)
             .Include(r => r.Category)
             .Include(r => r.ReportAttachments)
+            .Include(r => r.Messages)
             .FirstOrDefaultAsync();
 
         if (report is null) return NotFound(new { error = "Case not found." });
@@ -150,7 +152,18 @@ public class InvestigatorController : ControllerBase
             EncryptedKeyEnvelope = report.EncryptedKeyEnvelope,
             EncryptedIdentity = report.EncryptedIdentity,
             EncryptedIdentityKeyEnvelope = report.EncryptedIdentityKeyEnvelope,
-            Attachments = attachments
+            WbPublicKey = report.WbpublicKey ?? [],
+            Attachments = attachments,
+            Messages = report.Messages
+                .OrderBy(m => m.CreatedAt)
+                .Select(m => new MessageDto
+                {
+                    MessageId = m.MessageId,
+                    SenderRole = m.SenderRole,
+                    EncryptedContent = m.EncryptedContent,
+                    EncryptedKeyEnvelope = m.EncryptedKeyEnvelope,
+                    CreatedAt = m.CreatedAt
+                }).ToList()
         };
 
         return Ok(detail);
@@ -208,6 +221,35 @@ public class InvestigatorController : ControllerBase
             fileName = DecodeFileName(attachment.EncryptedFileName),
             sanitizationStatus = (byte)attachment.SanitizationStatus
         });
+    }
+
+    [HttpPost("cases/{caseNumber}/messages")]
+    public async Task<IActionResult> SendMessage(string caseNumber, [FromBody] SendMessageRequest request)
+    {
+        var investigator = await GetCurrentInvestigatorAsync();
+        if (investigator is null) return Unauthorized();
+
+        var report = await _dbContext.Reports
+            .Where(r => r.CaseNumber == caseNumber && !r.IsDeleted)
+            .FirstOrDefaultAsync();
+        if (report is null) return NotFound(new { error = "Case not found." });
+
+        var message = new Message
+        {
+            MessageId = Guid.NewGuid(),
+            ReportId = report.ReportId,
+            SenderRole = 0,
+            EncryptedContent = request.EncryptedContent,
+            EncryptedKeyEnvelope = request.EncryptedKeyEnvelope,
+            WbkeyEnvelope = request.WbKeyEnvelope,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _dbContext.Messages.Add(message);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { messageId = message.MessageId, createdAt = message.CreatedAt });
     }
 
     private static string DecodeFileName(byte[] encryptedFileName)

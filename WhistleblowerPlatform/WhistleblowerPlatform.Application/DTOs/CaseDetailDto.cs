@@ -14,7 +14,18 @@ public class CaseDetailDto
     public byte[] EncryptedKeyEnvelope { get; set; } = [];
     public byte[]? EncryptedIdentity { get; set; }
     public byte[]? EncryptedIdentityKeyEnvelope { get; set; }
+    public byte[] WbPublicKey { get; set; } = [];
     public List<AttachmentInfoDto> Attachments { get; set; } = [];
+    public List<MessageDto> Messages { get; set; } = [];
+}
+
+public class MessageDto
+{
+    public Guid MessageId { get; set; }
+    public byte SenderRole { get; set; }
+    public byte[] EncryptedContent { get; set; } = [];
+    public byte[] EncryptedKeyEnvelope { get; set; } = [];
+    public DateTime CreatedAt { get; set; }
 }
 
 public class AttachmentInfoDto
