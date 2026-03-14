@@ -1,0 +1,122 @@
+@page "/mailbox"
+@using WhistleblowerPlatform.Client.Services
+@inject CryptoService CryptoService
+@inject WhistleblowerService WbService
+
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4">Check Your Case</h2>
+
+    @if (_caseStatus == null)
+    {
+        <div class="card">
+            <div class="card-body">
+                <p class="text-muted small mb-3">Enter the token you received when you submitted your report.</p>
+                <textarea class="form-control mb-3" rows="3" placeholder="Paste your token here"
+                          @bind="_tokenInput" @bind:event="oninput"></textarea>
+                <button class="btn btn-primary"
+                        @onclick="CheckCase"
+                        disabled="@(_checking || string.IsNullOrWhiteSpace(_tokenInput))">
+                    @if (_checking)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Check Case
+                </button>
+                @if (_error != null)
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@_error</div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Case Number</div>
+                        <h5 class="mb-0">@_caseStatus.CaseNumber</h5>
+                    </div>
+                    <span class="badge @StatusBadgeClass(_caseStatus.Status) fs-6">@StatusLabel(_caseStatus.Status)</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-outline-secondary btn-sm mb-4" @onclick="Reset">Use a different token</button>
+
+        <div class="card">
+            <div class="card-header">Messages</div>
+            <div class="card-body">
+                <p class="text-muted small">No messages yet.</p>
+
+                <textarea class="form-control mb-2" rows="3"
+                          placeholder="Type your reply..."
+                          disabled="true"></textarea>
+                <button class="btn btn-primary btn-sm" disabled="true">Send Reply</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string _tokenInput = "";
+    private bool _checking = false;
+    private string? _error;
+    private CaseStatusResult? _caseStatus;
+    private string _tokenRaw = ""; // retained for US-2.2 message decryption
+
+    private async Task CheckCase()
+    {
+        _checking = true;
+        _error = null;
+        StateHasChanged();
+        try
+        {
+            var tokenHash = await CryptoService.HashTokenAsync(_tokenInput.Trim());
+            var result = await WbService.GetCaseAsync(tokenHash);
+            if (result is null)
+            {
+                _error = "Token not recognised. Please check and try again.";
+                return;
+            }
+            _tokenRaw = _tokenInput.Trim();
+            _caseStatus = result;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _checking = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Reset()
+    {
+        _caseStatus = null;
+        _tokenInput = "";
+        _tokenRaw = "";
+        _error = null;
+    }
+
+    private static string StatusLabel(byte status) => status switch
+    {
+        0 => "Submitted",
+        1 => "Under Review",
+        2 => "In Progress",
+        3 => "Closed",
+        _ => "Unknown"
+    };
+
+    private static string StatusBadgeClass(byte status) => status switch
+    {
+        0 => "bg-secondary",
+        1 => "bg-info text-dark",
+        2 => "bg-warning text-dark",
+        3 => "bg-success",
+        _ => "bg-secondary"
+    };
+}
