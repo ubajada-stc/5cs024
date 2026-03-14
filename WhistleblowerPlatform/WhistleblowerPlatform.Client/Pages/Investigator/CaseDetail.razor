@@ -24,8 +24,26 @@
     {
         <div class="d-flex justify-content-between align-items-start mb-3">
             <h3 class="mb-0">@_case.CaseNumber</h3>
-            <span class="badge @StatusBadgeClass(_case.Status) fs-6">@StatusLabel(_case.Status)</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge @StatusBadgeClass(_case.Status) fs-6">@StatusLabel(_case.Status)</span>
+                @if (_case.Status < 3)
+                {
+                    <button class="btn btn-sm btn-outline-secondary"
+                            @onclick="AdvanceStatus"
+                            disabled="@_changingStatus">
+                        @if (_changingStatus)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Move to @StatusLabel((byte)(_case.Status + 1))
+                    </button>
+                }
+            </div>
         </div>
+        @if (_statusError != null)
+        {
+            <div class="alert alert-danger p-2 small mb-3">@_statusError</div>
+        }
 
         <div class="row mb-3 text-muted small">
             <div class="col-auto">Category: <strong>@(_case.CategoryName ?? "—")</strong></div>
@@ -203,6 +221,9 @@
     private Guid? _downloadingId;
     private Dictionary<Guid, string> _downloadErrors = new Dictionary<Guid, string>();
 
+    private bool _changingStatus = false;
+    private string? _statusError;
+
     private Dictionary<Guid, string> _decryptedMessages = new Dictionary<Guid, string>();
     private string _replyText = "";
     private bool _sendingReply = false;
@@ -324,6 +345,29 @@
         finally
         {
             _downloadingId = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AdvanceStatus()
+    {
+        _changingStatus = true;
+        _statusError = null;
+        StateHasChanged();
+        try
+        {
+            var newStatus = (byte)(_case!.Status + 1);
+            var ok = await ReportService.UpdateStatusAsync(CaseNumber, newStatus);
+            if (!ok) throw new Exception("Server rejected the status change.");
+            _case.Status = newStatus;
+        }
+        catch (Exception ex)
+        {
+            _statusError = ex.Message;
+        }
+        finally
+        {
+            _changingStatus = false;
             StateHasChanged();
         }
     }

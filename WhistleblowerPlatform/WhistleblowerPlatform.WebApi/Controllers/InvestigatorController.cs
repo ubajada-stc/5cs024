@@ -223,6 +223,43 @@ public class InvestigatorController : ControllerBase
         });
     }
 
+    [HttpPatch("cases/{caseNumber}/status")]
+    public async Task<IActionResult> UpdateStatus(string caseNumber, [FromBody] UpdateStatusRequest request)
+    {
+        var investigator = await GetCurrentInvestigatorAsync();
+        if (investigator is null) return Unauthorized();
+
+        var report = await _dbContext.Reports
+            .Where(r => r.CaseNumber == caseNumber && !r.IsDeleted)
+            .FirstOrDefaultAsync();
+        if (report is null) return NotFound(new { error = "Case not found." });
+
+        if (request.NewStatus != (byte)report.Status + 1)
+            return BadRequest(new { error = "Invalid status transition." });
+
+        var oldStatus = report.Status;
+        report.Status = (ReportStatus)request.NewStatus;
+
+        var ackOverdue = !report.AcknowledgedAt.HasValue && report.AcknowledgementDueAt < DateTime.UtcNow;
+        var detail = $"{oldStatus} → {report.Status}" + (ackOverdue ? " [AcknowledgementOverdue]" : "");
+
+        _dbContext.AuditLogs.Add(new AuditLog
+        {
+            ActorType = 1,
+            ActorId = investigator.InvestigatorId.ToString(),
+            Action = "StatusChanged",
+            TargetEntity = "Report",
+            TargetId = caseNumber,
+            Detail = detail,
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString(),
+            Timestamp = DateTime.UtcNow
+        });
+
+        await _dbContext.SaveChangesAsync();
+        return Ok(new { status = (byte)report.Status });
+    }
+
     [HttpPost("cases/{caseNumber}/messages")]
     public async Task<IActionResult> SendMessage(string caseNumber, [FromBody] SendMessageRequest request)
     {

@@ -14,6 +14,16 @@ public class InvestigatorReportService
         _auth = auth;
     }
 
+    public async Task<bool> UpdateStatusAsync(string caseNumber, byte newStatus)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Patch,
+            $"/api/investigator/cases/{Uri.EscapeDataString(caseNumber)}/status");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+        req.Content = JsonContent.Create(new { NewStatus = newStatus });
+        using var resp = await _http.SendAsync(req);
+        return resp.IsSuccessStatusCode;
+    }
+
     public async Task<List<CaseListItem>> GetCasesAsync()
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, "/api/investigator/cases");
