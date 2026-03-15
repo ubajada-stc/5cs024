@@ -30,6 +30,22 @@ public class WhistleblowerService
         if (!resp.IsSuccessStatusCode) return null;
         return await resp.Content.ReadFromJsonAsync<WbMailboxResult>();
     }
+
+    public async Task<string?> GetInvestigatorPublicKeyAsync()
+    {
+        var resp = await _http.GetFromJsonAsync<PublicKeyResult>("/api/config/public-key");
+        return resp?.PublicKey;
+    }
+
+    public async Task<SendReplyResult?> SendReplyAsync(string tokenHashBase64, SendWbMessageRequest request)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/whistleblower/messages");
+        req.Headers.Add("X-WB-Token", tokenHashBase64);
+        req.Content = JsonContent.Create(request);
+        using var resp = await _http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode) return null;
+        return await resp.Content.ReadFromJsonAsync<SendReplyResult>();
+    }
 }
 
 public class CaseStatusResult
@@ -41,6 +57,7 @@ public class CaseStatusResult
 public class WbMailboxResult
 {
     public string EncryptedWbPrivateKey { get; set; } = "";
+    public string WbPublicKey { get; set; } = "";
     public byte[] ReportEncryptedContent { get; set; } = [];
     public byte[] ReportWbKeyEnvelope { get; set; } = [];
     public List<WbMessageModel> Messages { get; set; } = new List<WbMessageModel>();
@@ -53,4 +70,22 @@ public class WbMessageModel
     public byte[] EncryptedContent { get; set; } = [];
     public byte[] WbKeyEnvelope { get; set; } = [];
     public DateTime CreatedAt { get; set; }
+}
+
+public class SendWbMessageRequest
+{
+    public byte[] EncryptedContent { get; set; } = [];
+    public byte[] EncryptedKeyEnvelope { get; set; } = [];
+    public byte[]? WbKeyEnvelope { get; set; }
+}
+
+public class SendReplyResult
+{
+    public Guid MessageId { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class PublicKeyResult
+{
+    public string PublicKey { get; set; } = "";
 }

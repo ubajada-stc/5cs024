@@ -78,6 +78,10 @@
                                     {
                                         <div style="white-space: pre-wrap; word-break: break-word;">@msgText</div>
                                     }
+                                    else if (msg.SenderRole == 1)
+                                    {
+                                        <div class="small fst-italic">[Your message]</div>
+                                    }
                                     else
                                     {
                                         <div class="small fst-italic">Decrypting...</div>
@@ -89,8 +93,21 @@
                 }
                 <textarea class="form-control mb-2" rows="3"
                           placeholder="Type your reply..."
-                          disabled="true"></textarea>
-                <button class="btn btn-primary btn-sm" disabled="true">Send Reply</button>
+                          @bind="_replyText" @bind:event="oninput"
+                          disabled="@_sending"></textarea>
+                @if (_sendError != null)
+                {
+                    <div class="alert alert-danger small mt-1 mb-2">@_sendError</div>
+                }
+                <button class="btn btn-primary btn-sm"
+                        @onclick="SendReply"
+                        disabled="@(_sending || string.IsNullOrWhiteSpace(_replyText))">
+                    @if (_sending)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Send Reply
+                </button>
             </div>
         </div>
     }
@@ -107,6 +124,10 @@
     private Dictionary<Guid, string> _decryptedMessages = new Dictionary<Guid, string>();
     private string? _msgDecryptError;
     private string? _reportText;
+    private string _wbPublicKey = "";
+    private string _replyText = "";
+    private bool _sending = false;
+    private string? _sendError;
 
     private async Task CheckCase()
     {
@@ -153,6 +174,8 @@
             if (wbKeyEnc == null) return;
             var wbPrivateKey = await CryptoService.DecryptSymmetricAsync(
                 wbKeyEnc.Iv, wbKeyEnc.Ciphertext, wbKeyEnc.AuthTag, wrappingKey);
+
+            _wbPublicKey = mailbox.WbPublicKey;
 
             try
             {
@@ -202,7 +225,63 @@
         _decryptedMessages = new Dictionary<Guid, string>();
         _msgDecryptError = null;
         _reportText = null;
+        _wbPublicKey = "";
+        _replyText = "";
+        _sendError = null;
         _error = null;
+    }
+
+    private async Task SendReply()
+    {
+        _sending = true;
+        _sendError = null;
+        StateHasChanged();
+        try
+        {
+            var publicKey = await WbService.GetInvestigatorPublicKeyAsync();
+            if (publicKey == null) throw new Exception("Could not retrieve investigator public key.");
+
+            var plaintextBase64 = await CryptoService.StringToBase64Async(_replyText);
+            var symKey = await CryptoService.GenerateSymmetricKeyAsync();
+            var enc = await CryptoService.EncryptSymmetricAsync(plaintextBase64, symKey);
+            var contentJson = System.Text.Json.JsonSerializer.Serialize(enc);
+            var encryptedContent = System.Text.Encoding.UTF8.GetBytes(contentJson);
+            var encKeyBase64 = await CryptoService.EncryptWithPublicKeyAsync(symKey, publicKey);
+            var encryptedKeyEnvelope = Convert.FromBase64String(encKeyBase64);
+            var wbEncKeyBase64 = await CryptoService.EncryptWithPublicKeyAsync(symKey, _wbPublicKey);
+            var wbKeyEnvelope = Convert.FromBase64String(wbEncKeyBase64);
+
+            var request = new SendWbMessageRequest
+            {
+                EncryptedContent = encryptedContent,
+                EncryptedKeyEnvelope = encryptedKeyEnvelope,
+                WbKeyEnvelope = wbKeyEnvelope
+            };
+            var result = await WbService.SendReplyAsync(_tokenHash, request);
+            if (result == null) throw new Exception("Failed to send message.");
+
+            var sentText = _replyText;
+            _replyText = "";
+            var newMsg = new WbMessageModel
+            {
+                MessageId = result.MessageId,
+                SenderRole = 1,
+                EncryptedContent = encryptedContent,
+                WbKeyEnvelope = wbKeyEnvelope,
+                CreatedAt = result.CreatedAt
+            };
+            _messages.Add(newMsg);
+            _decryptedMessages[result.MessageId] = sentText;
+        }
+        catch (Exception ex)
+        {
+            _sendError = ex.Message;
+        }
+        finally
+        {
+            _sending = false;
+            StateHasChanged();
+        }
     }
 
     private static string StatusLabel(byte status) => status switch
