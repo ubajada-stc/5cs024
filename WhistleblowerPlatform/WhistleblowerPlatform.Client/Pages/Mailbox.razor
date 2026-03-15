@@ -45,11 +45,48 @@
 
         <button class="btn btn-outline-secondary btn-sm mb-4" @onclick="Reset">Use a different token</button>
 
+        @if (_reportText != null)
+        {
+            <div class="card mb-4">
+                <div class="card-header">Your Submitted Report</div>
+                <div class="card-body">
+                    <pre style="white-space: pre-wrap; word-break: break-word;">@_reportText</pre>
+                </div>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header">Messages</div>
             <div class="card-body">
-                <p class="text-muted small">No messages yet.</p>
-
+                @if (_msgDecryptError != null)
+                {
+                    <div class="alert alert-danger small">@_msgDecryptError</div>
+                }
+                @if (!_messages.Any())
+                {
+                    <p class="text-muted small">No messages yet.</p>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        @foreach (var msg in _messages)
+                        {
+                            <div class="d-flex @(msg.SenderRole == 0 ? "justify-content-end" : "justify-content-start") mb-2">
+                                <div class="border rounded p-2 @(msg.SenderRole == 0 ? "bg-primary text-white" : "bg-light")" style="max-width: 75%;">
+                                    <div class="small fw-bold mb-1">@(msg.SenderRole == 0 ? "Investigator" : "You") · @msg.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                                    @if (_decryptedMessages.TryGetValue(msg.MessageId, out var msgText))
+                                    {
+                                        <div style="white-space: pre-wrap; word-break: break-word;">@msgText</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="small fst-italic">Decrypting...</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
                 <textarea class="form-control mb-2" rows="3"
                           placeholder="Type your reply..."
                           disabled="true"></textarea>
@@ -64,7 +101,12 @@
     private bool _checking = false;
     private string? _error;
     private CaseStatusResult? _caseStatus;
-    private string _tokenRaw = ""; // retained for US-2.2 message decryption
+    private string _tokenRaw = "";
+    private string _tokenHash = "";
+    private List<WbMessageModel> _messages = new List<WbMessageModel>();
+    private Dictionary<Guid, string> _decryptedMessages = new Dictionary<Guid, string>();
+    private string? _msgDecryptError;
+    private string? _reportText;
 
     private async Task CheckCase()
     {
@@ -81,7 +123,12 @@
                 return;
             }
             _tokenRaw = _tokenInput.Trim();
+            _tokenHash = tokenHash;
             _caseStatus = result;
+
+            var mailbox = await WbService.GetMessagesAsync(tokenHash);
+            if (mailbox != null)
+                await DecryptMessagesAsync(mailbox);
         }
         catch (Exception ex)
         {
@@ -94,11 +141,67 @@
         }
     }
 
+    private async Task DecryptMessagesAsync(WbMailboxResult mailbox)
+    {
+        try
+        {
+            var wrappingKey = await CryptoService.HashTokenAsync(_tokenRaw);
+            var wbKeyBytes = Convert.FromBase64String(mailbox.EncryptedWbPrivateKey);
+            var wbKeyJson = System.Text.Encoding.UTF8.GetString(wbKeyBytes);
+            var wbKeyEnc = System.Text.Json.JsonSerializer.Deserialize<EncryptedDataModel>(wbKeyJson,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (wbKeyEnc == null) return;
+            var wbPrivateKey = await CryptoService.DecryptSymmetricAsync(
+                wbKeyEnc.Iv, wbKeyEnc.Ciphertext, wbKeyEnc.AuthTag, wrappingKey);
+
+            try
+            {
+                var reportKeyBase64 = Convert.ToBase64String(mailbox.ReportWbKeyEnvelope);
+                var reportSymKey = await CryptoService.DecryptWithPrivateKeyAsync(reportKeyBase64, wbPrivateKey);
+                var reportJson = System.Text.Encoding.UTF8.GetString(mailbox.ReportEncryptedContent);
+                var reportEnc = System.Text.Json.JsonSerializer.Deserialize<EncryptedDataModel>(reportJson,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (reportEnc != null)
+                {
+                    var reportPlainBase64 = await CryptoService.DecryptSymmetricAsync(reportEnc.Iv, reportEnc.Ciphertext, reportEnc.AuthTag, reportSymKey);
+                    _reportText = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(reportPlainBase64));
+                }
+            }
+            catch { /* report decryption failure is non-fatal */ }
+
+            _messages = mailbox.Messages;
+            foreach (var msg in _messages)
+            {
+                try
+                {
+                    var keyEnvelopeBase64 = Convert.ToBase64String(msg.WbKeyEnvelope);
+                    var symmetricKey = await CryptoService.DecryptWithPrivateKeyAsync(keyEnvelopeBase64, wbPrivateKey);
+                    var contentJson = System.Text.Encoding.UTF8.GetString(msg.EncryptedContent);
+                    var enc = System.Text.Json.JsonSerializer.Deserialize<EncryptedDataModel>(contentJson,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (enc == null) continue;
+                    var plaintextBase64 = await CryptoService.DecryptSymmetricAsync(enc.Iv, enc.Ciphertext, enc.AuthTag, symmetricKey);
+                    _decryptedMessages[msg.MessageId] = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(plaintextBase64));
+                }
+                catch { /* skip undecryptable message */ }
+            }
+        }
+        catch (Exception ex)
+        {
+            _msgDecryptError = $"Could not decrypt messages: {ex.Message}";
+        }
+    }
+
     private void Reset()
     {
         _caseStatus = null;
         _tokenInput = "";
         _tokenRaw = "";
+        _tokenHash = "";
+        _messages = new List<WbMessageModel>();
+        _decryptedMessages = new Dictionary<Guid, string>();
+        _msgDecryptError = null;
+        _reportText = null;
         _error = null;
     }
 
@@ -119,4 +222,11 @@
         3 => "bg-success",
         _ => "bg-secondary"
     };
+
+    private class EncryptedDataModel
+    {
+        public string Iv { get; set; } = "";
+        public string Ciphertext { get; set; } = "";
+        public string AuthTag { get; set; } = "";
+    }
 }
