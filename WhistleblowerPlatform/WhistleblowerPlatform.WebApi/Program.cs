@@ -105,11 +105,12 @@ app.Use(async (context, next) =>
     context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
     context.Response.Headers["Content-Security-Policy"] =
         "default-src 'self'; " +
-        "script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; " +
+        "script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://js.hcaptcha.com; " +
         "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data:; " +
+        "img-src 'self' data: https://*.hcaptcha.com; " +
         "font-src 'self'; " +
-        "connect-src 'self'; " +
+        "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; " +
+        "frame-src https://newassets.hcaptcha.com; " +
         "frame-ancestors 'none'; " +
         "object-src 'none'; " +
         "base-uri 'self'";
