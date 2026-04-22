@@ -11,7 +11,14 @@
             <div class="d-flex gap-2">
                 @if (AuthService.AccessToken != null)
                 {
-                    <a href="investigator/cases" class="btn btn-outline-primary btn-sm">Investigator Cases</a>
+                    @if (AuthService.Role == "Admin")
+                    {
+                        <a href="admin/dashboard" class="btn btn-outline-primary btn-sm">Admin Dashboard</a>
+                    }
+                    else
+                    {
+                        <a href="investigator/cases" class="btn btn-outline-primary btn-sm">Investigator Cases</a>
+                    }
                     <button class="btn btn-outline-secondary btn-sm" @onclick="HandleLogout">Logout</button>
                 }
                 else

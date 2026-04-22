@@ -1,0 +1,160 @@
+@page "/admin/audit-logs"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject AdminService AdminService
+@inject NavigationManager Navigation
+
+@code {
+    private AuditLogPage _result = new();
+    private bool _loading = true;
+    private string _error = "";
+
+    // Filters
+    private string _actorTypeFilter = "";
+    private string _actionFilter = "";
+    private DateTime? _fromFilter;
+    private DateTime? _toFilter;
+    private int _page = 1;
+    private const int PageSize = 50;
+
+    private static readonly Dictionary<byte, string> ActorLabels = new()
+    {
+        { 0, "Whistleblower" },
+        { 1, "Investigator" },
+        { 2, "Admin" },
+        { 3, "System" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = "";
+        byte? actorType = byte.TryParse(_actorTypeFilter, out var b) ? b : null;
+        _result = await AdminService.GetAuditLogsAsync(actorType, _actionFilter, _fromFilter, _toFilter, _page, PageSize);
+        _loading = false;
+    }
+
+    private async Task ApplyFilters()
+    {
+        _page = 1;
+        await LoadAsync();
+    }
+
+    private async Task GoToPage(int p)
+    {
+        _page = p;
+        await LoadAsync();
+    }
+
+    private int TotalPages => (int)Math.Ceiling((double)_result.Total / PageSize);
+
+    private string ActorLabel(byte actorType) =>
+        ActorLabels.TryGetValue(actorType, out var label) ? label : actorType.ToString();
+}
+
+<h3>Audit Logs</h3>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-2">
+        <select class="form-select form-select-sm" @bind="_actorTypeFilter">
+            <option value="">All actors</option>
+            <option value="0">Whistleblower</option>
+            <option value="1">Investigator</option>
+            <option value="2">Admin</option>
+            <option value="3">System</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm" placeholder="Action contains..."
+               @bind="_actionFilter" @bind:event="oninput" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" class="form-control form-control-sm"
+               @bind="_fromFilter" @bind:event="oninput" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" class="form-control form-control-sm"
+               @bind="_toFilter" @bind:event="oninput" />
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-primary btn-sm w-100" @onclick="ApplyFilters">Filter</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p class="text-muted small">@_result.Total result(s)</p>
+
+    <table class="table table-sm table-hover font-monospace" style="font-size:0.85rem">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in _result.Logs)
+            {
+                <tr>
+                    <td>@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@ActorLabel(log.ActorType)</td>
+                    <td>@log.Action</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(log.TargetEntity))
+                        {
+                            <span>@log.TargetEntity</span>
+                            @if (!string.IsNullOrEmpty(log.TargetId))
+                            {
+                                <span class="text-muted"> / @log.TargetId[..Math.Min(8, log.TargetId.Length)]…</span>
+                            }
+                        }
+                    </td>
+                    <td>@log.Ipaddress</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination pagination-sm">
+                <li class="page-item @(_page == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => GoToPage(_page - 1)">Previous</button>
+                </li>
+                @for (var p = 1; p <= TotalPages; p++)
+                {
+                    var pg = p;
+                    <li class="page-item @(_page == pg ? "active" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(pg)">@pg</button>
+                    </li>
+                }
+                <li class="page-item @(_page == TotalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => GoToPage(_page + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    }
+}

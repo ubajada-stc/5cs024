@@ -28,4 +28,5 @@ builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.InvestigatorKey
 builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.AuthService>();
 builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.InvestigatorReportService>();
 builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.WhistleblowerService>();
+builder.Services.AddScoped<WhistleblowerPlatform.Client.Services.AdminService>();
 await builder.Build().RunAsync();

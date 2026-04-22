@@ -7,6 +7,7 @@ public class AuthService
 {
     private readonly HttpClient _http;
     public string? AccessToken { get; private set; }
+    public string? Role { get; private set; }
 
     public AuthService(HttpClient http) => _http = http;
 
@@ -16,7 +17,10 @@ public class AuthService
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>()
             ?? new LoginResponse { Success = false, Error = "Empty response" };
         if (result.Success)
+        {
             AccessToken = result.AccessToken;
+            Role = result.Role;
+        }
         return result;
     }
 
@@ -62,6 +66,7 @@ public class AuthService
         finally
         {
             AccessToken = null;
+            Role = null;
         }
     }
 }
@@ -80,6 +85,7 @@ public class LoginResponse
     public int ExpiresIn { get; set; }
     public bool RequiresMfa { get; set; }
     public string? Error { get; set; }
+    public string? Role { get; set; }
 }
 
 public class SetupKeypairRequest

@@ -43,12 +43,22 @@ public class AuthController : ControllerBase
         var (response, rawRefreshToken) = await _loginUseCase.ExecuteAsync(request);
 
         if (!response.Success)
+        {
+            if (!response.RequiresMfa)
+            {
+                var failedUser = await _userManager.FindByEmailAsync(request.Email);
+                await WriteAuditLogAsync(0, failedUser?.Id.ToString(), "LoginFailed", "AspNetUsers", request.Email);
+            }
             return response.RequiresMfa ? Ok(response) : Unauthorized(response);
+        }
 
         response.ExpiresIn = _jwtSettings.AccessTokenExpiryMinutes * 60;
 
         var user = await _userManager.FindByEmailAsync(request.Email);
         SetRefreshCookies(rawRefreshToken!, user!.Id);
+
+        var actorType = response.Role == "Admin" ? (byte)2 : (byte)1;
+        await WriteAuditLogAsync(actorType, user.Id.ToString(), "Login", "AspNetUsers", user.Id.ToString());
 
         return Ok(response);
     }
@@ -69,7 +79,11 @@ public class AuthController : ControllerBase
         if (!await _tokenService.ValidateRefreshTokenAsync(user, rawToken))
             return Unauthorized();
 
-        var newAccessToken = _tokenService.GenerateAccessToken(user);
+        await _dbContext.Entry(user).Reference(u => u.Admin).LoadAsync();
+        await _dbContext.Entry(user).Reference(u => u.Investigator).LoadAsync();
+        var role = user.AdminId.HasValue ? "Admin" : "Investigator";
+
+        var newAccessToken = _tokenService.GenerateAccessToken(user, role);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
         await _tokenService.StoreRefreshTokenAsync(user, newRefreshToken);
 
@@ -91,11 +105,44 @@ public class AuthController : ControllerBase
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user is not null)
+            {
                 await _tokenService.RevokeRefreshTokenAsync(user);
+                await _dbContext.Entry(user).Reference(u => u.Admin).LoadAsync();
+                var actorType = user.AdminId.HasValue ? (byte)2 : (byte)1;
+                await WriteAuditLogAsync(actorType, user.Id.ToString(), "Logout", "AspNetUsers", user.Id.ToString());
+            }
         }
 
         ClearRefreshCookies();
         return NoContent();
+    }
+
+    // DEV ONLY — remove before production
+    [HttpPost("dev/link-admin")]
+    public async Task<IActionResult> LinkIdentityToExistingAdmin([FromBody] LinkIdentityRequest request)
+    {
+        var admin = await _dbContext.Admins
+            .FirstOrDefaultAsync(a => a.Email == request.Email);
+
+        if (admin is null)
+            return NotFound("No Admin found with that email.");
+
+        var existingUser = await _userManager.FindByEmailAsync(request.Email);
+        if (existingUser is not null)
+            return Conflict("An Identity user already exists for that email.");
+
+        var user = new ApplicationUser
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            AdminId = admin.AdminId
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { message = "Identity user created and linked to existing admin.", userId = user.Id });
     }
 
     // DEV ONLY — remove before production
@@ -124,6 +171,22 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
 
         return Ok(new { message = "Identity user created and linked to existing investigator.", userId = user.Id });
+    }
+
+    private async Task WriteAuditLogAsync(byte actorType, string? actorId, string action, string targetEntity, string? targetId)
+    {
+        _dbContext.AuditLogs.Add(new WhistleblowerPlatform.Domain.Entities.AuditLog
+        {
+            ActorType = actorType,
+            ActorId = actorId,
+            Action = action,
+            TargetEntity = targetEntity,
+            TargetId = targetId,
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString(),
+            Timestamp = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync();
     }
 
     private void SetRefreshCookies(string rawRefreshToken, Guid userId)

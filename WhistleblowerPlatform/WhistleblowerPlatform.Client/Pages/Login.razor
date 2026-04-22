@@ -75,6 +75,13 @@
                 return;
             }
 
+            if (response.Role == "Admin")
+            {
+                _password = "";
+                Navigation.NavigateTo("/admin/dashboard");
+                return;
+            }
+
             // Check whether this investigator already has a keypair
             var hasKeypair = await AuthService.HasKeypairAsync();
 

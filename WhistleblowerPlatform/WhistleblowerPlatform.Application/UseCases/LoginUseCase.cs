@@ -39,7 +39,14 @@ public class LoginUseCase
             return (Fail("Invalid credentials."), null);
         }
 
-        if (user.InvestigatorId.HasValue)
+        var role = "Investigator";
+
+        if (user.AdminId.HasValue)
+        {
+            role = "Admin";
+            await _userManager.ResetAccessFailedCountAsync(user);
+        }
+        else if (user.InvestigatorId.HasValue)
         {
             var investigator = await _investigatorRepository.GetByIdAsync(user.InvestigatorId.Value);
 
@@ -62,14 +69,15 @@ public class LoginUseCase
             await _userManager.ResetAccessFailedCountAsync(user);
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(user);
+        var accessToken = _tokenService.GenerateAccessToken(user, role);
         var refreshToken = _tokenService.GenerateRefreshToken();
         await _tokenService.StoreRefreshTokenAsync(user, refreshToken);
 
         return (new LoginResponse
         {
             Success = true,
-            AccessToken = accessToken
+            AccessToken = accessToken,
+            Role = role
         }, refreshToken);
     }
 

@@ -20,7 +20,7 @@ public class TokenService : ITokenService
         _userManager = userManager;
     }
 
-    public string GenerateAccessToken(ApplicationUser user)
+    public string GenerateAccessToken(ApplicationUser user, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -32,7 +32,8 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat,
                 DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64)
+                ClaimValueTypes.Integer64),
+            new Claim(ClaimTypes.Role, role)
         };
 
         var token = new JwtSecurityToken(

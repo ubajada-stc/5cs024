@@ -1,0 +1,101 @@
+@page "/admin/settings"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject AdminService AdminService
+@inject NavigationManager Navigation
+
+@code {
+    private List<SettingItem> _settings = new();
+    private bool _loading = true;
+    private string _error = "";
+
+    // Track edited values and save state per key
+    private Dictionary<string, string> _editValues = new();
+    private HashSet<string> _saving = new();
+    private HashSet<string> _saved = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _settings = await AdminService.GetSettingsAsync();
+        _editValues = _settings.ToDictionary(s => s.SettingKey, s => s.SettingValue);
+        _loading = false;
+    }
+
+    private async Task Save(string key)
+    {
+        _error = "";
+        _saving.Add(key);
+        _saved.Remove(key);
+        var ok = await AdminService.UpdateSettingAsync(key, _editValues[key]);
+        _saving.Remove(key);
+        if (!ok) { _error = $"Failed to save {key}."; return; }
+        _saved.Add(key);
+        var setting = _settings.FirstOrDefault(s => s.SettingKey == key);
+        if (setting != null) { setting.SettingValue = _editValues[key]; setting.UpdatedAt = DateTime.UtcNow; }
+    }
+}
+
+<h3>Platform Settings</h3>
+<p class="text-muted">Changes take effect immediately or on the next background service cycle.</p>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else if (!_settings.Any())
+{
+    <div class="alert alert-warning">
+        No settings found. Run the seed script in <code>db/005_seed_platform_settings.sql</code> to populate defaults.
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var setting in _settings)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">@setting.SettingKey</h6>
+                        @if (!string.IsNullOrEmpty(setting.Description))
+                        {
+                            <p class="card-text text-muted small">@setting.Description</p>
+                        }
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control"
+                                   value="@_editValues[setting.SettingKey]"
+                                   @oninput="e => _editValues[setting.SettingKey] = e.Value?.ToString() ?? string.Empty"
+                                   disabled="@_saving.Contains(setting.SettingKey)" />
+                            <button class="btn btn-primary"
+                                    @onclick="() => Save(setting.SettingKey)"
+                                    disabled="@_saving.Contains(setting.SettingKey)">
+                                @(_saving.Contains(setting.SettingKey) ? "Saving..." : "Save")
+                            </button>
+                        </div>
+                        @if (_saved.Contains(setting.SettingKey))
+                        {
+                            <div class="text-success small mt-1">Saved</div>
+                        }
+                        <div class="text-muted small mt-1">Last updated: @setting.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

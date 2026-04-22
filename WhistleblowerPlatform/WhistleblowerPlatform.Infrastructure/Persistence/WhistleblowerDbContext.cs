@@ -37,12 +37,17 @@ public partial class WhistleblowerDbContext : IdentityDbContext<ApplicationUser,
         // IMPORTANT: Call base method first - this sets up all Identity tables
         base.OnModelCreating(modelBuilder);
 
-        // Configure the relationship between ApplicationUser and Investigator
+        // Configure the relationship between ApplicationUser and Investigator / Admin
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
             entity.HasOne(u => u.Investigator)
                   .WithOne()
                   .HasForeignKey<ApplicationUser>(u => u.InvestigatorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(u => u.Admin)
+                  .WithOne()
+                  .HasForeignKey<ApplicationUser>(u => u.AdminId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 

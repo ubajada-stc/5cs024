@@ -23,4 +23,14 @@ public class ApplicationUser : IdentityUser<Guid>
     /// Navigation property to Investigator entity.
     /// </summary>
     public virtual Investigator? Investigator { get; set; }
+
+    /// <summary>
+    /// Link to the Admin domain entity (if this user is an admin).
+    /// </summary>
+    public Guid? AdminId { get; set; }
+
+    /// <summary>
+    /// Navigation property to Admin entity.
+    /// </summary>
+    public virtual Admin? Admin { get; set; }
 }

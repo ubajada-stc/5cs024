@@ -1,0 +1,149 @@
+@page "/admin/investigators"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject AdminService AdminService
+@inject NavigationManager Navigation
+
+@code {
+    private List<InvestigatorListItem> _investigators = new();
+    private bool _loading = true;
+    private string _error = "";
+
+    // New investigator form
+    private bool _showForm = false;
+    private string _newEmail = "";
+    private string _newPassword = "";
+    private bool _saving = false;
+    private string _formError = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = "";
+        _investigators = await AdminService.GetInvestigatorsAsync();
+        _loading = false;
+    }
+
+    private async Task CreateInvestigator()
+    {
+        _formError = "";
+        _saving = true;
+        var (success, error) = await AdminService.CreateInvestigatorAsync(_newEmail, _newPassword);
+        _saving = false;
+        if (!success)
+        {
+            _formError = error ?? "Failed to create investigator.";
+            return;
+        }
+        _newEmail = "";
+        _newPassword = "";
+        _showForm = false;
+        await LoadAsync();
+    }
+
+    private async Task Deactivate(Guid id)
+    {
+        var ok = await AdminService.DeactivateInvestigatorAsync(id);
+        if (!ok) _error = "Failed to deactivate investigator.";
+        else await LoadAsync();
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Investigators</h3>
+    <button class="btn btn-primary btn-sm" @onclick="() => _showForm = !_showForm">
+        @(_showForm ? "Cancel" : "New Investigator")
+    </button>
+</div>
+
+@if (_showForm)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6 class="card-title">Create Investigator</h6>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="email" class="form-control form-control-sm" placeholder="Email"
+                           @bind="_newEmail" @bind:event="oninput" disabled="@_saving" />
+                </div>
+                <div class="col-md-4">
+                    <input type="password" class="form-control form-control-sm" placeholder="Password"
+                           @bind="_newPassword" @bind:event="oninput" disabled="@_saving" />
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success btn-sm w-100"
+                            @onclick="CreateInvestigator"
+                            disabled="@(_saving || string.IsNullOrWhiteSpace(_newEmail) || string.IsNullOrWhiteSpace(_newPassword))">
+                        @(_saving ? "Saving..." : "Create")
+                    </button>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(_formError))
+            {
+                <div class="alert alert-danger mt-2 py-1">@_formError</div>
+            }
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Keypair</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inv in _investigators)
+            {
+                <tr>
+                    <td>@inv.Email</td>
+                    <td>
+                        <span class="badge @(inv.IsActive ? "bg-success" : "bg-secondary")">
+                            @(inv.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge @(inv.HasKeypair ? "bg-success" : "bg-warning text-dark")">
+                            @(inv.HasKeypair ? "Set up" : "Pending")
+                        </span>
+                    </td>
+                    <td>@inv.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (inv.IsActive)
+                        {
+                            <button class="btn btn-outline-danger btn-sm"
+                                    @onclick="() => Deactivate(inv.InvestigatorId)">
+                                Deactivate
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

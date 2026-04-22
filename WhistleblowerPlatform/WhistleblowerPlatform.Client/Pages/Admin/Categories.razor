@@ -1,0 +1,179 @@
+@page "/admin/categories"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject AdminService AdminService
+@inject NavigationManager Navigation
+
+@code {
+    private List<CategoryListItem> _categories = new();
+    private bool _loading = true;
+    private string _error = "";
+
+    // New category form
+    private bool _showForm = false;
+    private string _newName = "";
+    private string _newDescription = "";
+    private int _newDisplayOrder = 1;
+    private bool _saving = false;
+    private string _formError = "";
+
+    // Inline edit state
+    private int? _editingId = null;
+    private string _editName = "";
+    private string _editDescription = "";
+    private int _editDisplayOrder = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = "";
+        _categories = await AdminService.GetCategoriesAsync();
+        _loading = false;
+    }
+
+    private async Task CreateCategory()
+    {
+        _formError = "";
+        _saving = true;
+        var ok = await AdminService.CreateCategoryAsync(_newName, _newDescription, _newDisplayOrder);
+        _saving = false;
+        if (!ok) { _formError = "Failed to create category."; return; }
+        _newName = ""; _newDescription = ""; _newDisplayOrder = 1; _showForm = false;
+        await LoadAsync();
+    }
+
+    private void StartEdit(CategoryListItem c)
+    {
+        _editingId = c.CategoryId;
+        _editName = c.Name;
+        _editDescription = c.Description ?? "";
+        _editDisplayOrder = c.DisplayOrder;
+    }
+
+    private async Task SaveEdit(int id)
+    {
+        var ok = await AdminService.UpdateCategoryAsync(id, _editName, _editDescription, _editDisplayOrder);
+        if (!ok) { _error = "Failed to update category."; return; }
+        _editingId = null;
+        await LoadAsync();
+    }
+
+    private async Task Deactivate(int id)
+    {
+        var ok = await AdminService.DeactivateCategoryAsync(id);
+        if (!ok) _error = "Failed to deactivate category.";
+        else await LoadAsync();
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Report Categories</h3>
+    <button class="btn btn-primary btn-sm" @onclick="() => _showForm = !_showForm">
+        @(_showForm ? "Cancel" : "New Category")
+    </button>
+</div>
+
+@if (_showForm)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6 class="card-title">Create Category</h6>
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-sm" placeholder="Name"
+                           @bind="_newName" @bind:event="oninput" disabled="@_saving" />
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control form-control-sm" placeholder="Description (optional)"
+                           @bind="_newDescription" @bind:event="oninput" disabled="@_saving" />
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control form-control-sm" placeholder="Order"
+                           @bind="_newDisplayOrder" disabled="@_saving" />
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success btn-sm w-100"
+                            @onclick="CreateCategory"
+                            disabled="@(_saving || string.IsNullOrWhiteSpace(_newName))">
+                        @(_saving ? "Saving..." : "Create")
+                    </button>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(_formError))
+            {
+                <div class="alert alert-danger mt-2 py-1">@_formError</div>
+            }
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in _categories)
+            {
+                <tr>
+                    @if (_editingId == cat.CategoryId)
+                    {
+                        <td><input type="number" class="form-control form-control-sm" @bind="_editDisplayOrder" style="width:70px" /></td>
+                        <td><input type="text" class="form-control form-control-sm" @bind="_editName" @bind:event="oninput" /></td>
+                        <td><input type="text" class="form-control form-control-sm" @bind="_editDescription" @bind:event="oninput" /></td>
+                        <td></td>
+                        <td class="d-flex gap-1">
+                            <button class="btn btn-success btn-sm" @onclick="() => SaveEdit(cat.CategoryId)"
+                                    disabled="@string.IsNullOrWhiteSpace(_editName)">Save</button>
+                            <button class="btn btn-secondary btn-sm" @onclick="() => _editingId = null">Cancel</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@cat.DisplayOrder</td>
+                        <td>@cat.Name</td>
+                        <td>@cat.Description</td>
+                        <td>
+                            <span class="badge @(cat.IsActive ? "bg-success" : "bg-secondary")">
+                                @(cat.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td class="d-flex gap-1">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="() => StartEdit(cat)">Edit</button>
+                            @if (cat.IsActive)
+                            {
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Deactivate(cat.CategoryId)">Deactivate</button>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}

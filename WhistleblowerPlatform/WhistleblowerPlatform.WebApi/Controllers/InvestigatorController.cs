@@ -284,6 +284,19 @@ public class InvestigatorController : ControllerBase
         };
 
         _dbContext.Messages.Add(message);
+
+        _dbContext.AuditLogs.Add(new AuditLog
+        {
+            ActorType = 1,
+            ActorId = investigator.InvestigatorId.ToString(),
+            Action = "InvestigatorMessageSent",
+            TargetEntity = "Messages",
+            TargetId = caseNumber,
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString(),
+            Timestamp = DateTime.UtcNow
+        });
+
         await _dbContext.SaveChangesAsync();
 
         return Ok(new { messageId = message.MessageId, createdAt = message.CreatedAt });

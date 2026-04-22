@@ -126,6 +126,18 @@ public class WhistleblowerController : ControllerBase
         };
 
         _dbContext.Messages.Add(message);
+
+        _dbContext.AuditLogs.Add(new WhistleblowerPlatform.Domain.Entities.AuditLog
+        {
+            ActorType = 0,
+            Action = "WbMessageSent",
+            TargetEntity = "Messages",
+            TargetId = report.CaseNumber,
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString(),
+            Timestamp = DateTime.UtcNow
+        });
+
         await _dbContext.SaveChangesAsync();
 
         return Ok(new { messageId = message.MessageId, createdAt = message.CreatedAt });

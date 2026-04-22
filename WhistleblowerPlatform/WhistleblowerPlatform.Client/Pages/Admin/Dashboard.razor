@@ -1,0 +1,53 @@
+@page "/admin/dashboard"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+            Navigation.NavigateTo("/login");
+    }
+}
+
+<h3>Admin Dashboard</h3>
+
+<div class="row mt-4 g-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Investigators</h5>
+                <p class="card-text">Create, update, and deactivate investigator accounts.</p>
+                <a href="admin/investigators" class="btn btn-primary btn-sm">Manage Investigators</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Report Categories</h5>
+                <p class="card-text">Configure the categories available to whistleblowers.</p>
+                <a href="admin/categories" class="btn btn-primary btn-sm">Manage Categories</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Audit Logs</h5>
+                <p class="card-text">View platform activity for compliance and security.</p>
+                <a href="admin/audit-logs" class="btn btn-primary btn-sm">View Audit Logs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Platform Settings</h5>
+                <p class="card-text">Configure retention, deadlines, and platform options.</p>
+                <a href="admin/settings" class="btn btn-primary btn-sm">Manage Settings</a>
+            </div>
+        </div>
+    </div>
+</div>

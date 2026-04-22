@@ -4,7 +4,7 @@ namespace WhistleblowerPlatform.Application.Interfaces;
 
 public interface ITokenService
 {
-    string GenerateAccessToken(ApplicationUser user);
+    string GenerateAccessToken(ApplicationUser user, string role);
     string GenerateRefreshToken();
     Task StoreRefreshTokenAsync(ApplicationUser user, string rawToken);
     Task<bool> ValidateRefreshTokenAsync(ApplicationUser user, string rawToken);
