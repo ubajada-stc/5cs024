@@ -191,6 +191,17 @@ public class FileSanitizationService : IFileSanitizationService
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            _dbContext.AuditLogs.Add(new WhistleblowerPlatform.Domain.Entities.AuditLog
+            {
+                ActorType = 3,
+                Action = "SanitizationCompleted",
+                TargetEntity = "ReportAttachments",
+                TargetId = attachmentId.ToString(),
+                Detail = $"MimeType: {attachment.MimeType}",
+                Timestamp = DateTime.UtcNow
+            });
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
             _logger.LogInformation(
                 "Sanitization completed for attachment {AttachmentId} (type: {MimeType})",
                 attachmentId, attachment.MimeType);
@@ -307,6 +318,17 @@ public class FileSanitizationService : IFileSanitizationService
         // but should see a warning that metadata may be present.
         // Still delete the sanitization key and blob for security.
         await CleanupSanitizationDataAsync(attachment, cancellationToken);
+
+        _dbContext.AuditLogs.Add(new WhistleblowerPlatform.Domain.Entities.AuditLog
+        {
+            ActorType = 3,
+            Action = "SanitizationFailed",
+            TargetEntity = "ReportAttachments",
+            TargetId = attachment.AttachmentId.ToString(),
+            Detail = attachment.SanitizationError,
+            Timestamp = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task MarkSkippedAsync(
@@ -317,6 +339,17 @@ public class FileSanitizationService : IFileSanitizationService
         attachment.SanitizedAt = DateTime.UtcNow;
 
         await CleanupSanitizationDataAsync(attachment, cancellationToken);
+
+        _dbContext.AuditLogs.Add(new WhistleblowerPlatform.Domain.Entities.AuditLog
+        {
+            ActorType = 3,
+            Action = "SanitizationSkipped",
+            TargetEntity = "ReportAttachments",
+            TargetId = attachment.AttachmentId.ToString(),
+            Detail = $"MimeType: {attachment.MimeType}",
+            Timestamp = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task CleanupSanitizationDataAsync(
