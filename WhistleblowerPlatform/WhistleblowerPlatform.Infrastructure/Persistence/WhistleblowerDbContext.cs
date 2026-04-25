@@ -198,6 +198,7 @@ public partial class WhistleblowerDbContext : IdentityDbContext<ApplicationUser,
             entity.Property(e => e.SanitizationStoragePath).HasMaxLength(500);
             entity.Property(e => e.SanitizationError).HasMaxLength(500);
             entity.Property(e => e.SanitizationStatus).HasConversion<byte>();
+            entity.Property(e => e.OriginalStoragePath).HasMaxLength(500);
 
             entity.HasOne(d => d.Report).WithMany(p => p.ReportAttachments)
                 .HasForeignKey(d => d.ReportId)

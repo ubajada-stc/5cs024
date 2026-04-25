@@ -37,6 +37,15 @@ public class WhistleblowerService
         return resp?.PublicKey;
     }
 
+    public async Task<WbAttachmentBlobModel?> GetAttachmentAsync(string tokenHashBase64, Guid attachmentId)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"/api/whistleblower/attachments/{attachmentId}");
+        req.Headers.Add("X-WB-Token", tokenHashBase64);
+        using var resp = await _http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode) return null;
+        return await resp.Content.ReadFromJsonAsync<WbAttachmentBlobModel>();
+    }
+
     public async Task<SendReplyResult?> SendReplyAsync(string tokenHashBase64, SendWbMessageRequest request)
     {
         using var req = new HttpRequestMessage(HttpMethod.Post, "/api/whistleblower/messages");
@@ -61,6 +70,28 @@ public class WbMailboxResult
     public byte[] ReportEncryptedContent { get; set; } = [];
     public byte[] ReportWbKeyEnvelope { get; set; } = [];
     public List<WbMessageModel> Messages { get; set; } = new List<WbMessageModel>();
+    public List<WbAttachmentModel> Attachments { get; set; } = new List<WbAttachmentModel>();
+}
+
+public class WbAttachmentModel
+{
+    public Guid AttachmentId { get; set; }
+    public string FileName { get; set; } = "";
+    public string MimeType { get; set; } = "";
+    public long FileSize { get; set; }
+    public byte SanitizationStatus { get; set; }
+    public byte[] WbKeyEnvelope { get; set; } = [];
+}
+
+public class WbAttachmentBlobModel
+{
+    public string Iv { get; set; } = "";
+    public string Ciphertext { get; set; } = "";
+    public string AuthTag { get; set; } = "";
+    public string WbKeyEnvelope { get; set; } = "";
+    public string MimeType { get; set; } = "";
+    public string FileName { get; set; } = "";
+    public byte SanitizationStatus { get; set; }
 }
 
 public class WbMessageModel

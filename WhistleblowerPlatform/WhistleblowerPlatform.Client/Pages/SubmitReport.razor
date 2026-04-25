@@ -35,8 +35,15 @@
 
     <div class="mb-3">
         <label class="form-label">Report Details <span class="text-danger">*</span></label>
-        <textarea class="form-control" rows="8" @bind="reportText"
-                  placeholder="Describe the misconduct you wish to report..."></textarea>
+        <textarea class="form-control" rows="8"
+                  maxlength="5000"
+                  placeholder="Describe the misconduct you wish to report..."
+                  @bind="reportText" @bind:event="oninput"></textarea>
+        <div class="d-flex justify-content-end mt-1">
+            <small class="@(reportText.Length >= 5000 ? "text-danger" : "text-muted")">
+                @reportText.Length / 5000
+            </small>
+        </div>
     </div>
 
     <div class="card mb-3">

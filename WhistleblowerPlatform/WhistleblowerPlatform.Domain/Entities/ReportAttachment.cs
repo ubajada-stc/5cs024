@@ -23,6 +23,10 @@ public partial class ReportAttachment
 
     public DateTime? SanitizedAt { get; set; }
 
+    public string? OriginalStoragePath { get; set; }
+
+    public byte[]? OriginalPlaintextHash { get; set; }
+
     public byte[] EncryptedKeyEnvelope { get; set; } = null!;
 
     public byte[] WbkeyEnvelope { get; set; } = null!;

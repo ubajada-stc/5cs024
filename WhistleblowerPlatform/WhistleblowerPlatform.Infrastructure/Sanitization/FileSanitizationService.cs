@@ -163,8 +163,18 @@ public class FileSanitizationService : IFileSanitizationService
             // STEP 5: REPLACE STORED BLOB AND UPDATE RECORD
             // =========================================================
 
+            // Preserve the original encrypted recipient blob before overwriting
+            var originalBlob = await _storageService.ReadAsync(attachment.StoragePath);
+            var originalPath = await _storageService.SaveAsync(
+                attachment.ReportId,
+                attachment.AttachmentId,
+                originalBlob,
+                ".original");
+
+            // Compute SHA-256 of the original plaintext for integrity record
+            var originalHash = SHA256.HashData(fileContent);
+
             // Overwrite the recipient blob with the sanitized version
-            // We reuse the same StoragePath — the old blob is replaced
             await _storageService.SaveAsync(
                 attachment.ReportId,
                 attachment.AttachmentId,
@@ -177,6 +187,8 @@ public class FileSanitizationService : IFileSanitizationService
             attachment.FileSize = encryptedSanitized.Length;
             attachment.SanitizationStatus = SanitizationStatus.Completed;
             attachment.SanitizedAt = DateTime.UtcNow;
+            attachment.OriginalStoragePath = originalPath;
+            attachment.OriginalPlaintextHash = originalHash;
 
             // =========================================================
             // STEP 6: CLEAN UP — DELETE SANITIZATION DATA

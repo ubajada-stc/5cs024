@@ -55,6 +55,54 @@
             </div>
         }
 
+        @if (_attachments.Count > 0)
+        {
+            <div class="card mb-4">
+                <div class="card-header">Attachments</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var att in _attachments)
+                            {
+                                <tr>
+                                    <td class="align-middle">@att.FileName</td>
+                                    <td class="align-middle text-muted small">@FormatFileSize(att.FileSize)</td>
+                                    <td class="align-middle">
+                                        <span class="badge @SanitizationBadgeClass(att.SanitizationStatus)">
+                                            @SanitizationBadgeLabel(att.SanitizationStatus)
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                @onclick="() => DownloadAttachment(att)"
+                                                disabled="@(_downloadingAttachment.ContainsKey(att.AttachmentId) && _downloadingAttachment[att.AttachmentId])">
+                                            @if (_downloadingAttachment.ContainsKey(att.AttachmentId) && _downloadingAttachment[att.AttachmentId])
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            Download
+                                        </button>
+                                        @if (_attachmentErrors.ContainsKey(att.AttachmentId))
+                                        {
+                                            <div class="text-danger small mt-1">@_attachmentErrors[att.AttachmentId]</div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header">Messages</div>
             <div class="card-body">
@@ -125,6 +173,10 @@
     private string? _msgDecryptError;
     private string? _reportText;
     private string _wbPublicKey = "";
+    private string _wbPrivateKeyBase64 = "";
+    private List<WbAttachmentModel> _attachments = new List<WbAttachmentModel>();
+    private Dictionary<Guid, bool> _downloadingAttachment = new Dictionary<Guid, bool>();
+    private Dictionary<Guid, string> _attachmentErrors = new Dictionary<Guid, string>();
     private string _replyText = "";
     private bool _sending = false;
     private string? _sendError;
@@ -175,7 +227,9 @@
             var wbPrivateKey = await CryptoService.DecryptSymmetricAsync(
                 wbKeyEnc.Iv, wbKeyEnc.Ciphertext, wbKeyEnc.AuthTag, wrappingKey);
 
+            _wbPrivateKeyBase64 = wbPrivateKey;
             _wbPublicKey = mailbox.WbPublicKey;
+            _attachments = mailbox.Attachments;
 
             try
             {
@@ -226,6 +280,10 @@
         _msgDecryptError = null;
         _reportText = null;
         _wbPublicKey = "";
+        _wbPrivateKeyBase64 = "";
+        _attachments = new List<WbAttachmentModel>();
+        _downloadingAttachment = new Dictionary<Guid, bool>();
+        _attachmentErrors = new Dictionary<Guid, string>();
         _replyText = "";
         _sendError = null;
         _error = null;
@@ -282,6 +340,53 @@
             _sending = false;
             StateHasChanged();
         }
+    }
+
+    private async Task DownloadAttachment(WbAttachmentModel att)
+    {
+        _downloadingAttachment[att.AttachmentId] = true;
+        _attachmentErrors.Remove(att.AttachmentId);
+        StateHasChanged();
+        try
+        {
+            var blob = await WbService.GetAttachmentAsync(_tokenHash, att.AttachmentId);
+            if (blob == null) throw new Exception("Could not retrieve attachment.");
+            var result = await CryptoService.DecryptFileAttachmentAsync(
+                blob.Iv, blob.Ciphertext, blob.AuthTag, blob.WbKeyEnvelope, _wbPrivateKeyBase64);
+            await CryptoService.DownloadFileAsync(result.ContentBase64, blob.FileName, blob.MimeType);
+        }
+        catch (Exception ex)
+        {
+            _attachmentErrors[att.AttachmentId] = ex.Message;
+        }
+        finally
+        {
+            _downloadingAttachment[att.AttachmentId] = false;
+            StateHasChanged();
+        }
+    }
+
+    private static string SanitizationBadgeClass(byte status)
+    {
+        if (status == 2) return "bg-success";
+        if (status == 3) return "bg-danger";
+        if (status == 4) return "bg-secondary";
+        return "bg-warning text-dark";
+    }
+
+    private static string SanitizationBadgeLabel(byte status)
+    {
+        if (status == 2) return "Sanitized";
+        if (status == 3) return "Failed";
+        if (status == 4) return "Skipped";
+        return "Pending";
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024} KB";
+        return $"{bytes / (1024 * 1024)} MB";
     }
 
     private static string StatusLabel(byte status) => status switch
