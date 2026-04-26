@@ -18,7 +18,8 @@ public class PdfSanitizer : IFileSanitizer
         using var inputStream = new MemoryStream(fileContent);
         using var outputStream = new MemoryStream();
 
-        using var reader = new PdfReader(inputStream);
+        var readerProps = new ReaderProperties().SetUnethicalReading(true);
+        using var reader = new PdfReader(inputStream, readerProps);
         using var writer = new PdfWriter(outputStream);
         using var pdfDoc = new PdfDocument(reader, writer);
 
