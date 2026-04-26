@@ -222,7 +222,7 @@ public class FileSanitizationService : IFileSanitizationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Sanitization failed for attachment {AttachmentId}", attachmentId);
-            await MarkFailedAsync(attachment, ex.Message, cancellationToken);
+            await MarkFailedAsync(attachment, ex.ToString(), cancellationToken);
         }
         finally
         {

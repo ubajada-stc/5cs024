@@ -408,8 +408,8 @@
         StateHasChanged();
         try
         {
-            var ok = await ReportService.UpdateStatusAsync(CaseNumber, newStatus);
-            if (!ok) throw new Exception("Server rejected the status change.");
+            var (ok, err) = await ReportService.UpdateStatusAsync(CaseNumber, newStatus);
+            if (!ok) throw new Exception(err ?? "Server rejected the status change.");
             _case!.Status = newStatus;
         }
         catch (Exception ex)
