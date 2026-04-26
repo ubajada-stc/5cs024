@@ -27,6 +27,8 @@ public partial class ReportAttachment
 
     public byte[]? OriginalPlaintextHash { get; set; }
 
+    public byte[]? OriginalKeyEnvelope { get; set; }
+
     public byte[] EncryptedKeyEnvelope { get; set; } = null!;
 
     public byte[] WbkeyEnvelope { get; set; } = null!;

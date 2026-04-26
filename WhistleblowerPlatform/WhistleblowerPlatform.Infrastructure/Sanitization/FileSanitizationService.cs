@@ -181,6 +181,7 @@ public class FileSanitizationService : IFileSanitizationService
                 encryptedSanitized);
 
             // Update the attachment record
+            attachment.OriginalKeyEnvelope = attachment.EncryptedKeyEnvelope;
             attachment.EncryptedKeyEnvelope = newKeyEnvelope;
             attachment.WbkeyEnvelope = newWbKeyEnvelope;
             attachment.MimeType = result.MimeType;

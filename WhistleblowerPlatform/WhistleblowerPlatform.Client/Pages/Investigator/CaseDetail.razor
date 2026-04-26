@@ -26,15 +26,27 @@
             <h3 class="mb-0">@_case.CaseNumber</h3>
             <div class="d-flex align-items-center gap-2">
                 <span class="badge @StatusBadgeClass(_case.Status) fs-6">@StatusLabel(_case.Status)</span>
-                @if (_case.Status < 3)
+                @if (_case.Status == 2)
+                {
+                    <button class="btn btn-sm btn-outline-warning"
+                            @onclick="@(() => AdvanceStatus(3))"
+                            disabled="@_changingStatus">
+                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Refer to Court
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            @onclick="@(() => AdvanceStatus(4))"
+                            disabled="@_changingStatus">
+                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Close
+                    </button>
+                }
+                else if (_case.Status < 4)
                 {
                     <button class="btn btn-sm btn-outline-secondary"
-                            @onclick="AdvanceStatus"
+                            @onclick="@(() => AdvanceStatus((byte)(_case.Status + 1)))"
                             disabled="@_changingStatus">
-                        @if (_changingStatus)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                        }
+                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
                         Move to @StatusLabel((byte)(_case.Status + 1))
                     </button>
                 }
@@ -142,6 +154,18 @@
                                                 Download & Decrypt
                                             </button>
                                         }
+                                        @if (_case.Status == 3 && att.SanitizationStatus == 2)
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning ms-1"
+                                                    disabled="@(_downloadingOriginalId == att.AttachmentId)"
+                                                    @onclick="() => DownloadOriginal(att)">
+                                                @if (_downloadingOriginalId == att.AttachmentId)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                                }
+                                                Download Original
+                                            </button>
+                                        }
                                         @if (_downloadErrors.TryGetValue(att.AttachmentId, out var dlErr))
                                         {
                                             <div class="text-danger small mt-1">@dlErr</div>
@@ -219,6 +243,7 @@
     private string? _identityError;
 
     private Guid? _downloadingId;
+    private Guid? _downloadingOriginalId;
     private Dictionary<Guid, string> _downloadErrors = new Dictionary<Guid, string>();
 
     private bool _changingStatus = false;
@@ -349,17 +374,43 @@
         }
     }
 
-    private async Task AdvanceStatus()
+    private async Task DownloadOriginal(AttachmentModel att)
+    {
+        _downloadingOriginalId = att.AttachmentId;
+        _downloadErrors.Remove(att.AttachmentId);
+        StateHasChanged();
+        try
+        {
+            var blob = await ReportService.GetOriginalAttachmentBlobAsync(CaseNumber, att.AttachmentId);
+            if (blob == null) throw new Exception("Failed to fetch original attachment.");
+
+            var privateKey = KeyService.PrivateKeyBase64!;
+            var result = await CryptoService.DecryptFileAttachmentAsync(
+                blob.Iv, blob.Ciphertext, blob.AuthTag, blob.EncryptedKeyEnvelope, privateKey);
+
+            await CryptoService.DownloadFileAsync(result.ContentBase64, result.FileName, att.MimeType);
+        }
+        catch (Exception ex)
+        {
+            _downloadErrors[att.AttachmentId] = ex.Message;
+        }
+        finally
+        {
+            _downloadingOriginalId = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AdvanceStatus(byte newStatus)
     {
         _changingStatus = true;
         _statusError = null;
         StateHasChanged();
         try
         {
-            var newStatus = (byte)(_case!.Status + 1);
             var ok = await ReportService.UpdateStatusAsync(CaseNumber, newStatus);
             if (!ok) throw new Exception("Server rejected the status change.");
-            _case.Status = newStatus;
+            _case!.Status = newStatus;
         }
         catch (Exception ex)
         {
@@ -448,7 +499,8 @@
         0 => "Submitted",
         1 => "Under Review",
         2 => "In Progress",
-        3 => "Closed",
+        3 => "Referred to Court",
+        4 => "Closed",
         _ => "Unknown"
     };
 
@@ -457,7 +509,8 @@
         0 => "bg-secondary",
         1 => "bg-info text-dark",
         2 => "bg-warning text-dark",
-        3 => "bg-success",
+        3 => "bg-primary",
+        4 => "bg-success",
         _ => "bg-secondary"
     };
 

@@ -11,6 +11,7 @@ public enum ReportStatus : byte
     Submitted = 0,
     UnderReview = 1,
     InvestigationInProgress = 2,
-    Closed = 3
+    ReferredToCourt = 3,
+    Closed = 4
 }
 

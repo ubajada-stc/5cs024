@@ -25,7 +25,8 @@
                 <option value="0">Submitted</option>
                 <option value="1">Under Review</option>
                 <option value="2">Investigation In Progress</option>
-                <option value="3">Closed</option>
+                <option value="3">Referred to Court</option>
+                <option value="4">Closed</option>
             </select>
             <span class="text-muted">@FilteredCases.Count case(s)</span>
         </div>
@@ -107,7 +108,8 @@
         0 => "Submitted",
         1 => "Under Review",
         2 => "In Progress",
-        3 => "Closed",
+        3 => "Referred to Court",
+        4 => "Closed",
         _ => "Unknown"
     };
 
@@ -116,7 +118,8 @@
         0 => "bg-secondary",
         1 => "bg-info text-dark",
         2 => "bg-warning text-dark",
-        3 => "bg-success",
+        3 => "bg-primary",
+        4 => "bg-success",
         _ => "bg-secondary"
     };
 

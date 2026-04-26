@@ -52,6 +52,16 @@ public class InvestigatorReportService
         return await resp.Content.ReadFromJsonAsync<AttachmentBlobModel>();
     }
 
+    public async Task<AttachmentBlobModel?> GetOriginalAttachmentBlobAsync(string caseNumber, Guid attachmentId)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get,
+            $"/api/investigator/cases/{Uri.EscapeDataString(caseNumber)}/attachments/{attachmentId}/original");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+        using var resp = await _http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode) return null;
+        return await resp.Content.ReadFromJsonAsync<AttachmentBlobModel>();
+    }
+
     public async Task<MessageModel?> SendReplyAsync(
         string caseNumber, byte[] encryptedContent,
         byte[] encryptedKeyEnvelope, byte[] wbKeyEnvelope)

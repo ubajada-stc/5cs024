@@ -18,6 +18,14 @@ namespace WhistleblowerPlatform.WebApi.Controllers;
 [Authorize]
 public class InvestigatorController : ControllerBase
 {
+    private static readonly Dictionary<byte, byte[]> _allowedTransitions = new()
+    {
+        [0] = [1],
+        [1] = [2],
+        [2] = [3, 4],
+        [3] = [4],
+    };
+
     private readonly WhistleblowerDbContext _dbContext;
     private readonly IAttachmentStorageService _storageService;
 
@@ -223,6 +231,49 @@ public class InvestigatorController : ControllerBase
         });
     }
 
+    [HttpGet("cases/{caseNumber}/attachments/{attachmentId:guid}/original")]
+    public async Task<IActionResult> GetOriginalAttachment(string caseNumber, Guid attachmentId)
+    {
+        var investigator = await GetCurrentInvestigatorAsync();
+        if (investigator is null) return Unauthorized();
+
+        var report = await _dbContext.Reports
+            .Where(r => r.CaseNumber == caseNumber && !r.IsDeleted)
+            .FirstOrDefaultAsync();
+
+        if (report is null) return NotFound(new { error = "Case not found." });
+
+        if (report.Status != ReportStatus.ReferredToCourt)
+            return StatusCode(403, new { error = "Original files are only accessible when the case is Referred to Court." });
+
+        var attachment = await _dbContext.ReportAttachments
+            .FirstOrDefaultAsync(a => a.AttachmentId == attachmentId && a.ReportId == report.ReportId);
+
+        if (attachment is null) return NotFound(new { error = "Attachment not found." });
+
+        if (attachment.OriginalStoragePath is null || attachment.OriginalKeyEnvelope is null)
+            return NotFound(new { error = "Original file not available for this attachment." });
+
+        var blobBytes = await _storageService.ReadAsync(attachment.OriginalStoragePath);
+
+        var json = Encoding.UTF8.GetString(blobBytes);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var parts = JsonSerializer.Deserialize<EncryptedBlobParts>(json, options);
+        if (parts?.Iv is null || parts.Ciphertext is null || parts.AuthTag is null)
+            return BadRequest(new { error = "Invalid original blob format." });
+
+        return Ok(new
+        {
+            iv = parts.Iv,
+            ciphertext = parts.Ciphertext,
+            authTag = parts.AuthTag,
+            encryptedKeyEnvelope = Convert.ToBase64String(attachment.OriginalKeyEnvelope),
+            mimeType = attachment.MimeType,
+            fileName = DecodeFileName(attachment.EncryptedFileName),
+            sanitizationStatus = (byte)attachment.SanitizationStatus
+        });
+    }
+
     [HttpPatch("cases/{caseNumber}/status")]
     public async Task<IActionResult> UpdateStatus(string caseNumber, [FromBody] UpdateStatusRequest request)
     {
@@ -234,7 +285,8 @@ public class InvestigatorController : ControllerBase
             .FirstOrDefaultAsync();
         if (report is null) return NotFound(new { error = "Case not found." });
 
-        if (request.NewStatus != (byte)report.Status + 1)
+        var current = (byte)report.Status;
+        if (!_allowedTransitions.TryGetValue(current, out var allowed) || !allowed.Contains(request.NewStatus))
             return BadRequest(new { error = "Invalid status transition." });
 
         var oldStatus = report.Status;
