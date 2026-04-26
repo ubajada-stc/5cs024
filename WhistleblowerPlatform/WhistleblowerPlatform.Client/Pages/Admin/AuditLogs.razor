@@ -111,6 +111,7 @@ else
                 <th>Actor</th>
                 <th>Action</th>
                 <th>Target</th>
+                <th>Detail</th>
                 <th>IP</th>
             </tr>
         </thead>
@@ -131,6 +132,7 @@ else
                             }
                         }
                     </td>
+                    <td class="text-muted" style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="@log.Detail">@log.Detail</td>
                     <td>@log.Ipaddress</td>
                 </tr>
             }
