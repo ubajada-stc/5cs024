@@ -27,8 +27,8 @@
                                class="form-control"
                                style="padding-left: 3rem; font-family: monospace;"
                                placeholder="WB-XXXXXX-XXXXXX"
-                               @bind="_tokenInput"
-                               @bind:event="oninput" />
+                               value="@_tokenInput"
+                               @oninput="OnTokenInput" />
                     </div>
                     <button class="btn btn-primary px-4"
                             @onclick="CheckCase"
@@ -287,6 +287,12 @@
         {
             _msgDecryptError = $"Could not decrypt messages: {ex.Message}";
         }
+    }
+
+    private void OnTokenInput(ChangeEventArgs e)
+    {
+        var raw = e.Value?.ToString() ?? "";
+        _tokenInput = System.Text.RegularExpressions.Regex.Replace(raw, @"[^A-Za-z0-9\-]", "");
     }
 
     private void Reset()
