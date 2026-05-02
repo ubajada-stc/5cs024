@@ -6,115 +6,149 @@
 @inject IJSRuntime JS
 @implements IDisposable
 
-<div class="container mt-4" style="max-width: 720px;">
-    <h2 class="mb-4">Submit a Report</h2>
+<div class="hero-section">
+    <div style="max-width: 720px; margin: 0 auto;">
 
-    <div class="alert alert-info">
-        <strong>Your privacy is protected.</strong> All data is encrypted in your browser before being sent.
-        The server never sees your report in plaintext.
-    </div>
-
-    @if (errorMessage != null)
-    {
-        <div class="alert alert-danger">@errorMessage</div>
-    }
-
-    <div class="mb-3">
-        <label class="form-label">Category</label>
-        <select class="form-select" @bind="selectedCategoryId">
-            <option value="">-- Select a category --</option>
-            @if (categories != null)
-            {
-                @foreach (var category in categories)
-                {
-                    <option value="@category.CategoryId">@category.Name</option>
-                }
-            }
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Report Details <span class="text-danger">*</span></label>
-        <textarea class="form-control" rows="8"
-                  maxlength="5000"
-                  placeholder="Describe the misconduct you wish to report..."
-                  @bind="reportText" @bind:event="oninput"></textarea>
-        <div class="d-flex justify-content-end mt-1">
-            <small class="@(reportText.Length >= 5000 ? "text-danger" : "text-muted")">
-                @reportText.Length / 5000
-            </small>
+        <div class="text-center mb-5">
+            <h1>Submit Anonymous Report</h1>
+            <p class="lead">Your report is encrypted in your browser before being sent. The server never sees your data in plaintext.</p>
         </div>
-    </div>
 
-    <div class="card mb-3">
-        <div class="card-header">
-            Attachments
-        </div>
-        <div class="card-body">
-            <p class="text-muted">
-                Upload supporting documents, images, or audio files.
-                Max 1 GB per file, 5 GB total. Metadata (EXIF, GPS, author) will be stripped before encryption.
-            </p>
-            <InputFile OnChange="OnFilesSelected" multiple class="form-control" />
+        @if (errorMessage != null)
+        {
+            <div class="alert alert-danger mb-4">@errorMessage</div>
+        }
 
-            @if (selectedFiles.Count > 0)
-            {
-                <ul class="list-group mt-3">
-                    @foreach (var file in selectedFiles)
+        <div class="submit-form-card">
+
+            <!-- Category -->
+            <div class="mb-4">
+                <label class="form-label">Category</label>
+                <select class="form-select" @bind="selectedCategoryId">
+                    <option value="">Select a category...</option>
+                    @if (categories != null)
                     {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>@file.Name <small class="text-muted">(@FormatFileSize(file.Size))</small></span>
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveFile(file)">Remove</button>
-                        </li>
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.CategoryId">@category.Name</option>
+                        }
                     }
+                </select>
+            </div>
+
+            <!-- Report details -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-baseline mb-1">
+                    <label class="form-label mb-0">Report Details <span style="color: var(--color-destructive);">*</span></label>
+                    <small class="@(reportText.Length >= 5000 ? "text-danger" : "")" style="color: var(--color-muted-fg); font-size: 0.85rem;">@reportText.Length / 5000</small>
+                </div>
+                <textarea class="form-control" rows="8"
+                          maxlength="5000"
+                          placeholder="Describe the misconduct you wish to report..."
+                          @bind="reportText" @bind:event="oninput"></textarea>
+            </div>
+
+            <!-- File attachments -->
+            <div class="mb-4">
+                <label class="form-label">Attachments <span style="color: var(--color-muted-fg); font-weight: 400; font-size: 0.875rem;">(optional)</span></label>
+                <label class="file-upload-area d-block" for="fileInput">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-muted-fg); margin-bottom: 0.5rem;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <div style="font-size: 0.9rem; color: var(--color-muted-fg);">
+                        Click to upload files &mdash; max 1 GB per file, 5 GB total
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--color-muted-fg); margin-top: 0.25rem;">
+                        Metadata (EXIF, GPS, author) will be stripped automatically
+                    </div>
+                    <InputFile id="fileInput" OnChange="OnFilesSelected" multiple style="display: none;" />
+                </label>
+
+                @if (selectedFiles.Count > 0)
+                {
+                    <ul class="list-group mt-3">
+                        @foreach (var file in selectedFiles)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center" style="border-radius: var(--radius); border-color: var(--color-border);">
+                                <span style="font-size: 0.9rem;">@file.Name <small style="color: var(--color-muted-fg);">(@FormatFileSize(file.Size))</small></span>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveFile(file)">Remove</button>
+                            </li>
+                        }
+                    </ul>
+                    <div style="font-size: 0.85rem; color: var(--color-muted-fg); margin-top: 0.5rem; text-align: right;">
+                        Total: @FormatFileSize(selectedFiles.Sum(f => f.Size))
+                    </div>
+                }
+
+                @if (fileError != null)
+                {
+                    <div class="alert alert-danger mt-2 mb-0">@fileError</div>
+                }
+            </div>
+
+            <!-- Optional identity -->
+            <div class="mb-4">
+                <div class="identity-panel">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="showIdentityCheck" @bind="showIdentity" />
+                        <label class="form-check-label" for="showIdentityCheck" style="font-weight: 500;">
+                            I want to optionally identify myself
+                        </label>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--color-muted-fg); margin-top: 0.35rem; padding-left: 1.6rem;">
+                        This information is encrypted and only visible to the investigator.
+                    </div>
+
+                    @if (showIdentity)
+                    {
+                        <div class="mt-3 pt-3" style="border-top: 1px solid var(--color-border);">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control" placeholder="Your full name" @bind="identityName" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" placeholder="your@email.com" @bind="identityEmail" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" placeholder="+1 555 000 0000" @bind="identityPhone" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Info panel -->
+            <div class="info-panel mb-4">
+                <strong style="color: var(--color-foreground); font-size: 0.9rem;">Before submitting</strong>
+                <ul>
+                    <li>Your report is encrypted client-side — the server never sees plaintext.</li>
+                    <li>Save your case number after submission to check status later.</li>
+                    <li>Uploaded files will have metadata automatically removed.</li>
+                    <li>Do not include information that could directly identify you unless intended.</li>
                 </ul>
-                <p class="text-muted mt-2 mb-0">
-                    Total: @FormatFileSize(selectedFiles.Sum(f => f.Size))
-                </p>
-            }
+            </div>
 
-            @if (fileError != null)
-            {
-                <div class="alert alert-danger mt-2 mb-0">@fileError</div>
-            }
+            <!-- Submit button -->
+            <button class="btn btn-submit w-100" @onclick="HandleSubmitClick" disabled="@isSubmitting">
+                @if (isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span>@submitStatus</span>
+                }
+                else
+                {
+                    <span>Submit Report Securely</span>
+                }
+            </button>
+
         </div>
     </div>
-
-    <div class="card mb-3">
-        <div class="card-header">
-            Optional: Identify Yourself
-        </div>
-        <div class="card-body">
-            <div class="alert alert-warning mb-3">
-                <strong>These fields are entirely OPTIONAL.</strong> Providing your identity is voluntary.
-                If provided, this information will be encrypted and only visible to the investigator.
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-control" @bind="identityName" />
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" @bind="identityEmail" />
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Phone</label>
-                <input type="tel" class="form-control" @bind="identityPhone" />
-            </div>
-        </div>
-    </div>
-
-    <button class="btn btn-primary btn-lg w-100" @onclick="HandleSubmitClick" disabled="@isSubmitting">
-        @if (isSubmitting)
-        {
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            <span>@submitStatus</span>
-        }
-        else
-        {
-            <span>Submit Report</span>
-        }
-    </button>
 </div>
 
 <!-- CAPTCHA Verification Modal -->
@@ -179,6 +213,7 @@
     private string identityName = "";
     private string identityEmail = "";
     private string identityPhone = "";
+    private bool showIdentity = false;
     private string? errorMessage;
     private string? fileError;
     private bool isSubmitting = false;

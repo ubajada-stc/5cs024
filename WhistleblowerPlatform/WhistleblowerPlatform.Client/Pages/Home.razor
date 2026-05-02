@@ -1,35 +1,114 @@
-﻿@page "/"
+@page "/"
 
-<div class="container mt-5">
-    <div class="text-center mb-5">
-        <h1 class="display-5">Whistleblower Reporting Platform</h1>
-        <p class="lead text-muted">Report misconduct securely and anonymously. All data is encrypted in your browser before being sent.</p>
-    </div>
+<div class="hero-section">
+    <div style="max-width: 1100px; margin: 0 auto;">
 
-    <div class="row justify-content-center g-4">
-        <div class="col-md-5">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center d-flex flex-column">
-                    <h3 class="card-title">Submit a Report</h3>
-                    <p class="card-text text-muted flex-grow-1">
-                        Submit an anonymous report of misconduct. No account required.
-                        You will receive a secure token to track your case.
-                    </p>
-                    <a href="/submit" class="btn btn-primary btn-lg mt-3">Submit a Report</a>
+        <!-- Hero headline -->
+        <div class="text-center mb-5">
+            <h1>Anonymous Whistleblower<br>Reporting Platform</h1>
+            <p class="lead">
+                Report misconduct, fraud, or policy violations safely and anonymously.
+                Your identity is protected through end-to-end encryption and secure protocols.
+            </p>
+        </div>
+
+        <!-- Portal cards 2×2 grid -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 d-flex">
+                <a href="/submit" class="portal-card d-flex flex-column">
+                    <div class="portal-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <h2>Submit a Report</h2>
+                    <p>File an anonymous complaint about misconduct, unethical behavior, fraud, or policy violations.</p>
+                    <div class="portal-card-link mt-auto">Start Report <span>→</span></div>
+                </a>
+            </div>
+            <div class="col-md-6 d-flex">
+                <a href="/mailbox" class="portal-card d-flex flex-column">
+                    <div class="portal-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </div>
+                    <h2>Check Report Status</h2>
+                    <p>Use your unique token to check the status of your report and view investigator feedback.</p>
+                    <div class="portal-card-link mt-auto">Check Status <span>→</span></div>
+                </a>
+            </div>
+            <div class="col-md-6 d-flex">
+                <a href="/login" class="portal-card d-flex flex-column">
+                    <div class="portal-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <polyline points="16 11 18 13 22 9"></polyline>
+                        </svg>
+                    </div>
+                    <h2>Investigator Portal</h2>
+                    <p>Access the investigator dashboard to review cases, communicate with whistleblowers, and manage investigations.</p>
+                    <div class="portal-card-link mt-auto">Login <span>→</span></div>
+                </a>
+            </div>
+            <div class="col-md-6 d-flex">
+                <a href="/admin/login" class="portal-card d-flex flex-column">
+                    <div class="portal-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </div>
+                    <h2>Administrator Portal</h2>
+                    <p>Monitor system operations, manage cases, and ensure compliance with security policies.</p>
+                    <div class="portal-card-link mt-auto">Login <span>→</span></div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Security features panel -->
+        <div class="features-panel">
+            <h3 class="text-center mb-4" style="font-size: 1.25rem;">Security Features</h3>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">End-to-End Encryption</h4>
+                    <p class="mb-0" style="color: var(--color-muted-fg); font-size: 0.9rem; line-height: 1.6;">All reports and files are encrypted before storage</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">No Identity Tracking</h4>
+                    <p class="mb-0" style="color: var(--color-muted-fg); font-size: 0.9rem; line-height: 1.6;">IP addresses and personal data are not logged</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">File Sanitization</h4>
+                    <p class="mb-0" style="color: var(--color-muted-fg); font-size: 0.9rem; line-height: 1.6;">Metadata is automatically removed from uploaded files</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center d-flex flex-column">
-                    <h3 class="card-title">Check Your Case</h3>
-                    <p class="card-text text-muted flex-grow-1">
-                        Already submitted a report? Enter your case token to check the
-                        status and read messages from the investigator.
-                    </p>
-                    <a href="/mailbox" class="btn btn-outline-primary btn-lg mt-3">Check Your Case</a>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>

@@ -1,14 +1,21 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using WhistleblowerPlatform.Client.Services
 @inject AuthService AuthService
 @inject InvestigatorKeyService KeyService
 @inject NavigationManager Navigation
 
-<div class="page">
-    <main>
-        <div class="top-row px-4 d-flex justify-content-between align-items-center">
-            <a href="/" class="btn btn-outline-primary btn-sm">Home</a>
-            <div class="d-flex gap-2">
+<div class="d-flex flex-column min-vh-100">
+    <header class="site-header">
+        <div class="container-fluid d-flex justify-content-between align-items-center" style="max-width: 1200px; margin: 0 auto;">
+            <a href="/" class="site-logo">
+                <div class="site-logo-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <span>Whistleblower Anonymous Reporting Platform</span>
+            </a>
+            <div class="d-flex gap-2 align-items-center">
                 @if (AuthService.AccessToken != null)
                 {
                     @if (AuthService.Role == "Admin")
@@ -17,21 +24,25 @@
                     }
                     else
                     {
-                        <a href="investigator/cases" class="btn btn-outline-primary btn-sm">Investigator Cases</a>
+                        <a href="investigator/cases" class="btn btn-outline-primary btn-sm">My Cases</a>
                     }
                     <button class="btn btn-outline-secondary btn-sm" @onclick="HandleLogout">Logout</button>
                 }
                 else
                 {
-                    <a href="login" class="btn btn-outline-primary btn-sm">Login</a>
+                    <a href="login" class="btn btn-primary btn-sm px-3">Login</a>
                 }
             </div>
         </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="flex-grow-1">
+        @Body
     </main>
+
+    <footer class="site-footer">
+        <p class="mb-0">All reports are encrypted and anonymous. Your identity is protected through advanced security measures.</p>
+    </footer>
 </div>
 
 @code {
