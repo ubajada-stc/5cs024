@@ -58,12 +58,13 @@
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                     <div style="font-size: 0.9rem; color: var(--color-muted-fg);">
-                        Click to upload files &mdash; max 1 GB per file, 5 GB total
+                        Click to upload files &mdash; PDF and images only
                     </div>
                     <div style="font-size: 0.8rem; color: var(--color-muted-fg); margin-top: 0.25rem;">
-                        Metadata (EXIF, GPS, author) will be stripped automatically
+                        JPEG, PNG, WebP, GIF, BMP, TIFF &middot; Max 1 GB per file, 5 GB total &middot; Metadata stripped automatically
                     </div>
-                    <InputFile id="fileInput" OnChange="OnFilesSelected" multiple style="display: none;" />
+                    <InputFile id="fileInput" OnChange="OnFilesSelected" multiple style="display: none;"
+                               accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,application/pdf" />
                 </label>
 
                 @if (selectedFiles.Count > 0)
@@ -220,9 +221,15 @@
     private string submitStatus = "Encrypting...";
     private List<IBrowserFile> selectedFiles = new();
 
-    private const long MaxFileSize = 1L * 1024 * 1024 * 1024;       // 1 GB
-    private const long MaxTotalSize = 5L * 1024 * 1024 * 1024;      // 5 GB
-    private const long MaxFileReadSize = 1L * 1024 * 1024 * 1024;   // for ReadAsync buffer
+    private const long MaxFileSize = 1L * 1024 * 1024 * 1024;
+    private const long MaxTotalSize = 5L * 1024 * 1024 * 1024;
+    private const long MaxFileReadSize = 1L * 1024 * 1024 * 1024;
+
+    private static readonly HashSet<string> AllowedMimeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp", "image/tiff",
+        "application/pdf"
+    };
 
     // NEW: CAPTCHA-related fields
     private string hCaptchaSiteKey = string.Empty;
@@ -609,7 +616,12 @@
 
         foreach (var file in e.GetMultipleFiles(20))
         {
-            // Check individual file size
+            if (!AllowedMimeTypes.Contains(file.ContentType))
+            {
+                fileError = $"'{file.Name}' is not a supported file type. Only PDF and image files (JPEG, PNG, WebP, GIF, BMP, TIFF) are accepted.";
+                continue;
+            }
+
             if (file.Size > MaxFileSize)
             {
                 fileError = $"'{file.Name}' exceeds the 1 GB file size limit.";
