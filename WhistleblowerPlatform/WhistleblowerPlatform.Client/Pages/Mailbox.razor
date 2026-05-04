@@ -292,7 +292,7 @@
     private void OnTokenInput(ChangeEventArgs e)
     {
         var raw = e.Value?.ToString() ?? "";
-        _tokenInput = System.Text.RegularExpressions.Regex.Replace(raw, @"[^A-Za-z0-9\-]", "");
+        _tokenInput = System.Text.RegularExpressions.Regex.Replace(raw, @"[^A-Za-z0-9+/=]", "");
     }
 
     private void Reset()
