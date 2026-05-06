@@ -1,0 +1,180 @@
+1. Cryptographic Algorithms
+
+A. End-to-End Encryption for Whistleblower Communication
+
+Use hybrid encryption.
+
+Asymmetric encryption
+Use Elliptic Curve Cryptography with Curve25519.
+Recommended standard: Ed25519 for signatures and X25519 for key exchange.
+
+Symmetric encryption
+Use AES for message encryption.
+
+Hashing
+Use SHA-256 or SHA-3 256.
+
+Key exchange
+Use ECDH based on Curve25519.
+
+Why
+ECC provides strong security with smaller keys and better performance than traditional RSA.
+
+B. Password Hashing
+
+Never store passwords in plain text.
+
+Use
+Argon2
+Variant: Argon2id
+
+Minimum configuration
+Memory costs at least 64 MB
+Time costs at least 3 iterations
+Parallelism 1 or more, depending on server capacity
+Unique random salt per user
+
+If unavailable, use bcrypt with cost factor of 12 or higher.
+
+2. Password Policy for Investigator and Administrator
+
+Minimum length
+16 characters minimum
+Recommended 18 to 24 characters
+
+Complexity
+At least
+1 uppercase
+1 lowercase
+1 number
+1 special character
+No dictionary words
+No personal data
+Cannot reuse the last 10 passwords
+
+Encourage passphrases with high entropy, such as four or five random words plus numbers and symbols.
+
+Password expiry
+Avoid forced frequent expiry. Change only if a compromise is suspected.
+
+3. Login Attempt Limits
+
+Maximum 5 failed attempts
+Account locked for 15 minutes
+After 3 lock cycles require manual security reset
+Apply exponential delay after each failure
+Apply IP rate limiting
+Apply CAPTCHA after 3 failed attempts
+
+Log all failed authentication attempts.
+
+4. Email Format for Investigator and Administrator
+
+Must use the official organizational domain, such as investigator@organization.org
+
+No public email providers
+Must comply with RFC 5322 format
+Require email verification during onboarding
+Use DMARC, SPF, and DKIM for domain protection
+
+5. Two Factor Authentication
+
+Best option
+Use hardware-based authentication using FIDO2 security keys.
+
+Why
+Resistant to phishing
+Resistant to man-in-the-middle attacks
+No shared secrets stored on the server
+
+Second option
+TOTP using authenticator apps
+Standard: Time-based One-Time Password
+6-digit code
+30-second validity window
+
+Avoid
+SMS based 2FA
+Email OTP
+
+6. Role-Based Access Control
+
+Implement strict RBAC.
+
+Administrator
+Can manage user accounts
+Can reset investigator credentials
+Cannot access the report database tables
+No decryption keys
+No read permission on whistleblower content
+
+Investigator
+Can access only assigned reports
+Can decrypt only using the private key
+Cannot create administrators
+Cannot modify system-level security settings
+
+Use separate database roles with least privilege.
+
+7. Anonymous Whistleblower Design
+
+No account creation required.
+Generate 128 bit random case ID.
+Generate a separate secret reply token.
+Do not log IP addresses. If logs are required for abuse protection, anonymize immediately.
+Allow access via Tor.
+Set a strict no-tracking policy.
+Disable analytics and third-party scripts.
+
+8. Secure Session Management
+
+Enforce TLS 1.3 only.
+Set cookies as Secure, HttpOnly, SameSite Strict.
+Session timeout after 10 minutes inactivity.
+Re authentication required for sensitive actions.
+Regenerate session ID after login.
+
+9. Key Management
+
+Store private keys inside a Hardware Security Module.
+Separate encryption keys per investigator.
+Rotate keys annually or upon role change.
+Immediate revocation process if a compromise is suspected.
+
+10. Logging and Monitoring
+
+Log
+Authentication events
+Privilege changes
+Administrative actions
+
+Do not log
+Message contents
+Decrypted reports
+Whistleblower metadata
+
+Store logs in append only system.
+Protect logs with integrity monitoring.
+
+11. Infrastructure Controls
+
+Separate the web server and database server.
+Encrypt the database at rest using AES 256.
+Use parameterized queries.
+Deploy Web Application Firewall.
+Perform annual penetration testing aligned with OWASP Top 10 risks.
+Apply regular patch management.
+
+12. Secure Account Recovery
+
+No self-service reset via email alone.
+Require identity verification.
+Force 2FA re-enrollment after reset.
+Notify the security team of reset events.
+
+Security Principles for Whistleblower Systems
+
+Confidentiality is priority one.
+Anonymity is priority two.
+Integrity of evidence is priority three.
+Availability is important, but not above identity protection.
