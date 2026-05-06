@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penetration Test Report - WhistleblowerPlatform</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 4px solid #d32f2f;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #d32f2f;
+            margin: 0;
+            font-size: 32px;
+        }
+        h2 {
+            color: #d32f2f;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+        .metadata {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #d32f2f;
+            margin: 20px 0;
+        }
+        .metadata table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .metadata td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .metadata td:first-child {
+            font-weight: bold;
+            width: 200px;
+        }
+        .exec-summary {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .risk-table {
+            margin: 20px 0;
+        }
+        .risk-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .risk-table th, .risk-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .risk-table th {
+            background: #d32f2f;
+            color: white;
+        }
+        .risk-critical { background: #721c24; color: white; font-weight: bold; }
+        .risk-high { background: #d32f2f; color: white; font-weight: bold; }
+        .risk-medium { background: #ff9800; color: white; font-weight: bold; }
+        .risk-low { background: #ffc107; font-weight: bold; }
+        .risk-info { background: #17a2b8; color: white; }
+
+        .finding-card {
+            border: 1px solid #ddd;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        .finding-card.medium {
+            border-left: 5px solid #ff9800;
+        }
+        .finding-card.low {
+            border-left: 5px solid #ffc107;
+        }
+        .finding-card.info {
+            border-left: 5px solid #17a2b8;
+        }
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .finding-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .cvss-badge {
+            background: #333;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .finding-detail {
+            margin: 10px 0;
+        }
+        .finding-detail strong {
+            display: inline-block;
+            width: 150px;
+            color: #555;
+        }
+        .remediation {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .control-card {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .control-card.partial {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .control-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        .control-card.partial .control-title {
+            color: #f57c00;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+        .stat-box {
+            display: inline-block;
+            text-align: center;
+            padding: 20px;
+            margin: 10px;
+            min-width: 120px;
+            border-radius: 5px;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Web Application Penetration Test Report</h1>
+            <p style="font-size: 18px; color: #666; margin: 10px 0 0 0;">WhistleblowerPlatform Application Security Assessment</p>
+        </div>
+
+        <div class="metadata">
+            <table>
+                <tr>
+                    <td>Target Application:</td>
+                    <td>wb-platform-dreamteam.azurewebsites.net</td>
+                </tr>
+                <tr>
+                    <td>Scan Date:</td>
+                    <td>Monday, April 27, 2026</td>
+                </tr>
+                <tr>
+                    <td>Tested By:</td>
+                    <td>duluri@kali</td>
+                </tr>
+                <tr>
+                    <td>Platform:</td>
+                    <td>Microsoft Azure Web App (Kestrel/ASP.NET Core)</td>
+                </tr>
+                <tr>
+                    <td>Framework:</td>
+                    <td>Blazor WebAssembly</td>
+                </tr>
+                <tr>
+                    <td>IP Address:</td>
+                    <td>4.232.99.3</td>
+                </tr>
+                <tr>
+                    <td>Testing Methodology:</td>
+                    <td>OWASP Testing Guide, Manual + Automated Scanning</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="exec-summary">
+            <h2 style="margin-top: 0; border: none;">📊 Executive Summary</h2>
+            <p>This penetration test was conducted on the WhistleblowerPlatform web application to identify security vulnerabilities and misconfigurations. The assessment utilized multiple industry-standard tools including Nmap, WhatWeb, Gobuster, OWASP ZAP, and Nikto.</p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="stat-box" style="background: #4caf50; color: white;">
+                    <span class="stat-number">MEDIUM</span>
+                    <span class="stat-label">Overall Risk</span>
+                </div>
+                <div class="stat-box" style="background: #fff; border: 2px solid #ddd;">
+                    <span class="stat-number">6</span>
+                    <span class="stat-label">Total Findings</span>
+                </div>
+            </div>
+
+            <table style="width: 100%; margin: 20px 0;">
+                <tr>
+                    <td style="width: 50%;"><strong>Critical Vulnerabilities:</strong></td>
+                    <td style="text-align: right;"><span class="risk-critical" style="padding: 5px 15px; border-radius: 3px;">0</span></td>
+                </tr>
+                <tr>
+                    <td><strong>High Vulnerabilities:</strong></td>
+                    <td style="text-align: right;"><span class="risk-high" style="padding: 5px 15px; border-radius: 3px;">0</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Medium Vulnerabilities:</strong></td>
+                    <td style="text-align: right;"><span class="risk-medium" style="padding: 5px 15px; border-radius: 3px;">3</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Low Vulnerabilities:</strong></td>
+                    <td style="text-align: right;"><span class="risk-low" style="padding: 5px 15px; border-radius: 3px;">1</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Informational:</strong></td>
+                    <td style="text-align: right;"><span class="risk-info" style="padding: 5px 15px; border-radius: 3px;">2</span></td>
+                </tr>
+            </table>
+
+            <p><strong>Key Findings:</strong> The application demonstrates strong infrastructure security with proper HTTPS enforcement, modern TLS configuration, and comprehensive security headers. However, Content Security Policy refinements and Subresource Integrity implementation are needed to achieve production-ready security posture.</p>
+        </div>
+
+        <h2>🔍 Detailed Findings</h2>
+
+        <div class="finding-card medium">
+            <div class="finding-header">
+                <div class="finding-title">FIND-001: CSP Failure to Define Directive with No Fallback</div>
+                <div class="cvss-badge">CVSS 5.3</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Medium</div>
+            <div class="finding-detail"><strong>Category:</strong> Security Misconfiguration</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A05:2021 - Security Misconfiguration</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-693</div>
+            <div class="finding-detail"><strong>Tool:</strong> OWASP ZAP</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                The Content Security Policy (CSP) header is missing the <code>form-action</code> directive, which does not fall back to <code>default-src</code>. This creates a policy gap that could be exploited.
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                Without explicit form-action restrictions, forms could potentially be submitted to untrusted destinations, enabling phishing or data exfiltration attacks.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                Add the <code>form-action</code> directive to your CSP header. Example:<br>
+                <code>Content-Security-Policy: ... form-action 'self';</code>
+            </div>
+        </div>
+
+        <div class="finding-card medium">
+            <div class="finding-header">
+                <div class="finding-title">FIND-002: CSP style-src unsafe-inline</div>
+                <div class="cvss-badge">CVSS 5.3</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Medium</div>
+            <div class="finding-detail"><strong>Category:</strong> Security Misconfiguration</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A05:2021 - Security Misconfiguration</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-693</div>
+            <div class="finding-detail"><strong>Tool:</strong> OWASP ZAP</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                The CSP header allows <code>'unsafe-inline'</code> in the <code>style-src</code> directive, weakening XSS protection.
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                Inline styles can be exploited for CSS injection attacks and reduce the effectiveness of CSP as a defense-in-depth control against XSS.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                1. Move all inline styles to external CSS files<br>
+                2. Use CSP nonces or hashes for any required inline styles<br>
+                3. Remove <code>'unsafe-inline'</code> from the policy
+            </div>
+        </div>
+
+        <div class="finding-card medium">
+            <div class="finding-header">
+                <div class="finding-title">FIND-003: Subresource Integrity (SRI) Attribute Missing</div>
+                <div class="cvss-badge">CVSS 5.9</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Medium</div>
+            <div class="finding-detail"><strong>Category:</strong> Software and Data Integrity Failures</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A08:2021 - Software and Data Integrity Failures</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-345</div>
+            <div class="finding-detail"><strong>Tool:</strong> OWASP ZAP</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                External JavaScript resources (hCaptcha, CDN libraries) are loaded without Subresource Integrity (SRI) attributes.
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                If external CDNs or third-party services are compromised, malicious JavaScript could be injected without detection, leading to complete application compromise.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                Add <code>integrity</code> and <code>crossorigin</code> attributes to all external script tags:<br>
+                <code>&lt;script src="https://cdn.example.com/lib.js"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;integrity="sha384-hash..."<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;crossorigin="anonymous"&gt;&lt;/script&gt;</code>
+            </div>
+        </div>
+
+        <div class="finding-card low">
+            <div class="finding-header">
+                <div class="finding-title">FIND-004: Cross-Domain JavaScript Source File Inclusion</div>
+                <div class="cvss-badge">CVSS 3.7</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Low</div>
+            <div class="finding-detail"><strong>Category:</strong> Software and Data Integrity</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A08:2021 - Software and Data Integrity Failures</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-829</div>
+            <div class="finding-detail"><strong>Tool:</strong> OWASP ZAP</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                The application loads JavaScript from third-party domains (js.hcaptcha.com, cdn.jsdelivr.net).
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                Creates supply chain risk and dependency on external services.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                1. Minimize reliance on external JavaScript libraries<br>
+                2. Consider self-hosting critical dependencies<br>
+                3. Implement SRI (see FIND-003) and strict CSP directives
+            </div>
+        </div>
+
+        <div class="finding-card info">
+            <div class="finding-header">
+                <div class="finding-title">FIND-005: Information Disclosure - Suspicious Comments</div>
+                <div class="cvss-badge">Info</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Informational</div>
+            <div class="finding-detail"><strong>Category:</strong> Information Disclosure</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A01:2021 - Broken Access Control</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-615</div>
+            <div class="finding-detail"><strong>Tool:</strong> OWASP ZAP</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                The <code>jscrypto.js</code> file contains detailed comments describing cryptographic implementation logic.
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                Provides attackers with a detailed roadmap of security implementation, potentially revealing attack vectors.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                Implement JavaScript minification and comment stripping in your production build pipeline.
+            </div>
+        </div>
+
+        <div class="finding-card info">
+            <div class="finding-header">
+                <div class="finding-title">FIND-006: Server Version Disclosure</div>
+                <div class="cvss-badge">Info</div>
+            </div>
+            <div class="finding-detail"><strong>Severity:</strong> Informational</div>
+            <div class="finding-detail"><strong>Category:</strong> Information Disclosure</div>
+            <div class="finding-detail"><strong>OWASP:</strong> A05:2021 - Security Misconfiguration</div>
+            <div class="finding-detail"><strong>CWE:</strong> CWE-200</div>
+            <div class="finding-detail"><strong>Tool:</strong> Nmap / WhatWeb</div>
+            <div class="finding-detail">
+                <strong>Description:</strong><br>
+                HTTP response headers reveal server software: <code>Server: Kestrel</code>
+            </div>
+            <div class="finding-detail">
+                <strong>Impact:</strong><br>
+                Enables targeted reconnaissance and potential exploit development specific to Kestrel server.
+            </div>
+            <div class="remediation">
+                <strong>💡 Remediation:</strong><br>
+                Configure your ASP.NET Core application to suppress or obfuscate the Server header in <code>Program.cs</code>.
+            </div>
+        </div>
+
+        <h2>✅ Security Controls - Positive Findings</h2>
+        <p>The following security controls were found to be properly implemented:</p>
+
+        <div class="controls-grid">
+            <div class="control-card">
+                <div class="control-title">✓ HTTPS Enforcement</div>
+                <div style="font-size: 14px;">HTTP (port 80) properly redirects to HTTPS. All traffic is encrypted.</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ HSTS Header</div>
+                <div style="font-size: 14px;">max-age=31536000; includeSubDomains - Forces HTTPS for 1 year</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ X-Frame-Options</div>
+                <div style="font-size: 14px;">SAMEORIGIN - Prevents clickjacking attacks</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ X-Content-Type-Options</div>
+                <div style="font-size: 14px;">nosniff - Prevents MIME sniffing attacks</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ Referrer-Policy</div>
+                <div style="font-size: 14px;">strict-origin-when-cross-origin - Controls referrer leakage</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ Permissions-Policy</div>
+                <div style="font-size: 14px;">Blocks camera, microphone, geolocation, payment APIs</div>
+            </div>
+            <div class="control-card partial">
+                <div class="control-title">⚠ Content Security Policy</div>
+                <div style="font-size: 14px;">Present but needs refinement (see findings)</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ TLS 1.3 Configuration</div>
+                <div style="font-size: 14px;">Strong cipher: TLS_AES_256_GCM_SHA384</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ Valid SSL Certificate</div>
+                <div style="font-size: 14px;">Microsoft-issued wildcard cert, valid until Aug 25, 2026</div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">✓ No Exposed Admin Panels</div>
+                <div style="font-size: 14px;">Gobuster found no hidden directories or backup files</div>
+            </div>
+        </div>
+
+        <h2>🛠️ Tools & Methodology</h2>
+        <div class="risk-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Version</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Nmap</strong></td>
+                        <td>7.99</td>
+                        <td>Port scanning, service detection, SSL/TLS analysis</td>
+                        <td>✓ Completed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WhatWeb</strong></td>
+                        <td>Latest</td>
+                        <td>Technology fingerprinting, security headers analysis</td>
+                        <td>✓ Completed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gobuster</strong></td>
+                        <td>3.8.2</td>
+                        <td>Directory and file enumeration</td>
+                        <td>✓ Completed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OWASP ZAP</strong></td>
+                        <td>2.17.0</td>
+                        <td>Comprehensive web application vulnerability scanning</td>
+                        <td>✓ Completed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nikto</strong></td>
+                        <td>2.6.0</td>
+                        <td>Web server vulnerability scanning</td>
+                        <td>⚠ Incomplete - TLS fingerprinting blocked</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>📋 Recommendations & Next Steps</h2>
+        <h3>Priority 1 - Critical Fixes (Medium Severity)</h3>
+        <ol>
+            <li><strong>Refine Content Security Policy:</strong> Add missing <code>form-action</code> directive and remove <code>'unsafe-inline'</code> from <code>style-src</code></li>
+            <li><strong>Implement Subresource Integrity:</strong> Add integrity hashes to all external script and link tags (hCaptcha, CDN resources)</li>
+        </ol>
+
+        <h3>Priority 2 - Code Quality (Informational)</h3>
+        <ol>
+            <li><strong>Remove Production Comments:</strong> Configure build pipeline to strip comments from JavaScript files, especially <code>jscrypto.js</code></li>
+            <li><strong>Obfuscate Server Header:</strong> Configure ASP.NET Core to remove or customize the "Kestrel" server header</li>
+        </ol>
+
+        <h3>Priority 3 - Supply Chain Security</h3>
+        <ol>
+            <li><strong>Minimize External Dependencies:</strong> Evaluate whether all third-party JavaScript is necessary</li>
+            <li><strong>Self-Host Critical Libraries:</strong> Consider hosting argon2-browser and other security-critical libraries locally</li>
+        </ol>
+
+        <h3>Testing Recommendations</h3>
+        <ol>
+            <li><strong>Manual Authentication Testing:</strong> Perform manual testing of authentication/authorization flows (not covered by automated scans)</li>
+            <li><strong>Business Logic Testing:</strong> Test cryptographic implementation in <code>jscrypto.js</code> for logic flaws</li>
+            <li><strong>Retest After Remediation:</strong> Run OWASP ZAP and Nikto again after implementing fixes</li>
+            <li><strong>Consider Bug Bounty:</strong> After remediating findings, consider a private bug bounty program for additional validation</li>
+        </ol>
+
+        <h2>📈 Risk Assessment Matrix</h2>
+        <p>Based on CVSS v3.1 scoring and business impact analysis:</p>
+        <div class="risk-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Finding ID</th>
+                        <th>Risk Level</th>
+                        <th>CVSS Score</th>
+                        <th>Business Impact</th>
+                        <th>Exploitability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FIND-003</td>
+                        <td class="risk-medium">Medium</td>
+                        <td>5.9</td>
+                        <td>High (Supply Chain)</td>
+                        <td>Low (Requires CDN compromise)</td>
+                    </tr>
+                    <tr>
+                        <td>FIND-001</td>
+                        <td class="risk-medium">Medium</td>
+                        <td>5.3</td>
+                        <td>Medium</td>
+                        <td>Low (Requires form presence)</td>
+                    </tr>
+                    <tr>
+                        <td>FIND-002</td>
+                        <td class="risk-medium">Medium</td>
+                        <td>5.3</td>
+                        <td>Medium</td>
+                        <td>Medium (If XSS exists)</td>
+                    </tr>
+                    <tr>
+                        <td>FIND-004</td>
+                        <td class="risk-low">Low</td>
+                        <td>3.7</td>
+                        <td>Medium</td>
+                        <td>Low</td>
+                    </tr>
+                    <tr>
+                        <td>FIND-005</td>
+                        <td class="risk-info">Info</td>
+                        <td>0.0</td>
+                        <td>Low</td>
+                        <td>N/A</td>
+                    </tr>
+                    <tr>
+                        <td>FIND-006</td>
+                        <td class="risk-info">Info</td>
+                        <td>0.0</td>
+                        <td>Low</td>
+                        <td>N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>📝 Conclusion</h2>
+        <p>The WhistleblowerPlatform application demonstrates a <strong>strong baseline security posture</strong> with proper implementation of fundamental security controls including HTTPS enforcement, HSTS, modern TLS configuration, and comprehensive security headers.</p>
+
+        <p>No critical or high-severity vulnerabilities were identified during this assessment. The three medium-severity findings relate to Content Security Policy refinements and Subresource Integrity implementation—both of which are straightforward to remediate and should be addressed before production deployment.</p>
+
+        <p>The application's clean attack surface (no exposed admin panels or backup files) and defensive security headers indicate good security awareness during development. With the recommended fixes implemented, the application will be well-positioned for production use.</p>
+
+        <p><strong>Overall Risk Rating: MEDIUM</strong> - Acceptable for continued development with required remediation before production deployment.</p>
+
+        <div class="footer">
+            <p>This report was generated on April 27, 2026</p>
+            <p>Penetration Test conducted by duluri@kali using industry-standard tools and OWASP methodology</p>
+            <p><strong>Confidential - For Internal Use Only</strong></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZAP by Checkmarx Scanning Report</title>
+<link
+	href="2026-04-27-ZAP-Report-/normalize/normalize.css" rel="stylesheet">
+<link
+	href="2026-04-27-ZAP-Report-/themes/original/main.css" rel="stylesheet">
+<link
+	href="2026-04-27-ZAP-Report-/themes/original/colors.css" rel="stylesheet">
+</head>
+<body>
+	<header>
+		<h1>ZAP by Checkmarx Scanning Report</h1>
+		<p>
+			<span>Generated with</span> <a href="https://zaproxy.org"><img
+				src="2026-04-27-ZAP-Report-/zap32x32.png" alt="The ZAP logo" class="zap-logo">ZAP</a>
+			<span>on Mon 27 Apr 2026, at 22:30:19</span>
+		</p>
+		<p>ZAP Version: 2.17.0</p>
+		<p>
+			ZAP by <a href="https://checkmarx.com/">Checkmarx</a>
+		</p>
+	</header>
+
+	<main>
+
+		<section id="contents" class="contents">
+			<h2>Contents</h2>
+			<nav>
+				<ol>
+					<li><a
+						href="#about-this-report">About This Report</a>
+						<ol>
+							
+							<li><a
+								href="#report-parameters">Report Parameters</a></li>
+						</ol></li>
+					<data-th-block>
+					<li><a
+						href="#summaries">Summaries</a>
+						<ol>
+							<li><a
+								href="#risk-confidence-counts">Alert Counts by Risk and Confidence</a></li>
+							<li><a
+								href="#site-risk-counts">Alert Counts by Site and Risk</a></li>
+							<li><a
+								href="#alert-type-counts">Alert Counts by Alert Type</a></li>
+							<li><a
+								href="#insights">Insights</a></li>
+						</ol></li>
+					<li><a
+						href="#alerts">Alerts</a>
+						<ol>
+							
+							 
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-2-confidence-3"><span>Risk</span>=<span
+									class="risk-level">Medium</span>, <span>Confidence</span>=<span
+									class="confidence-level">High</span> <span>(3)</span></a></li>
+							
+							
+							
+							
+							  
+							
+							
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-1-confidence-2"><span>Risk</span>=<span
+									class="risk-level">Low</span>, <span>Confidence</span>=<span
+									class="confidence-level">Medium</span> <span>(1)</span></a></li>
+							
+							
+							  
+							
+							
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-0-confidence-2"><span>Risk</span>=<span
+									class="risk-level">Informational</span>, <span>Confidence</span>=<span
+									class="confidence-level">Medium</span> <span>(1)</span></a></li>
+							
+							<li><a
+								href="#alerts--risk-0-confidence-1"><span>Risk</span>=<span
+									class="risk-level">Informational</span>, <span>Confidence</span>=<span
+									class="confidence-level">Low</span> <span>(1)</span></a></li>
+							  
+						</ol></li>
+					<li><a
+						href="#appendix">Appendix</a>
+						<ol>
+							<li><a
+								href="#alert-types">Alert Types</a></li>
+						</ol></li>
+					</data-th-block>
+				</ol>
+			</nav>
+		</section>
+
+		<section
+			id="about-this-report" class="about-this-report">
+			<h2>About This Report</h2>
+
+			
+
+			<section
+				id="report-parameters">
+				<h3>Report Parameters</h3>
+				<div class="report-parameters--container">
+					<h4>Contexts</h4>
+					
+					
+					<p>No contexts were selected, so all contexts were included by default.</p>
+					  
+
+					<h4>Sites</h4>
+					
+					<p>The following sites were included:</p>
+					<ul class="sites-list">
+						<li><span class="site">https://wb-platform-dreamteam.azurewebsites.net</span></li>
+					</ul>
+					
+					<p>(If no sites were selected, all sites were included by default.)</p>
+					<p>An included site must also be within one of the included contexts for its data to be included in the report.</p>
+
+					<h4>Risk levels</h4>
+					<p>
+						<span>Included</span>:
+						 
+						<span class="included-risk-codes"><span class="risk-level">High</span>, <span class="risk-level">Medium</span>, <span class="risk-level">Low</span>, <span class="risk-level">Informational</span></span>
+					</p>
+					<p>
+						<span>Excluded</span>:
+						 <span>None</span>
+						
+					</p>
+
+					<h4>Confidence levels</h4>
+					<p>
+						<span>Included</span>:
+						
+						
+						<span class="included-confidence-codes"><span class="confidence-level">User Confirmed</span>, <span class="confidence-level">High</span>, <span class="confidence-level">Medium</span>, <span class="confidence-level">Low</span></span>
+					</p>
+					<p>
+						<span>Excluded</span>:
+						
+						
+						<span class="included-confidence-codes"> <span class="confidence-level">User Confirmed</span>, <span class="confidence-level">High</span>, <span class="confidence-level">Medium</span>, <span class="confidence-level">Low</span>, <span class="confidence-level">False Positive</span></span>
+					</p>
+				</div>
+			</section>
+		</section>
+
+		
+		<section>
+			
+		</section>
+		
+		<section id="summaries" class="summaries">
+			<h2>Summaries</h2>
+
+			<section
+				id="risk-confidence-counts">
+				<h3>Alert Counts by Risk and Confidence</h3>
+				<table class="risk-confidence-counts-table">
+					<caption>
+						<p>This table shows the number of alerts for each level of risk and confidence included in the report.</p>
+						<p>(The percentages in brackets represent the count as a percentage of the total number of alerts included in the report, rounded to one decimal place.)</p>
+					</caption>
+					<colgroup>
+						<col>
+						<col>
+					</colgroup>
+					<colgroup>
+						<col
+							style="width: 14.0%"><col
+							style="width: 14.0%"><col
+							style="width: 14.0%"><col
+							style="width: 14.0%">
+						<col style="width: 14.0%">
+					</colgroup>
+					<thead>
+						<tr>
+							<td colspan="2" rowspan="2"></td>
+							<th scope="colgroup"
+								colspan="5">Confidence</th>
+						</tr>
+						<tr>
+							<th scope="col">User Confirmed</th>
+							<th scope="col">High</th>
+							<th scope="col">Medium</th>
+							<th scope="col">Low</th>
+							<th scope="col">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="rowgroup"
+								rowspan="5">Risk</th>
+							<th scope="row">High</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span class="additional-info-percentages">(0.0%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Medium</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>3</span><br> <span
+								class="additional-info-percentages">(50.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>3</span><br> <span class="additional-info-percentages">(50.0%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Low</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(16.7%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span class="additional-info-percentages">(16.7%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Informational</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(16.7%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(16.7%)</span></td>
+							<td><span>2</span><br> <span class="additional-info-percentages">(33.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row">Total</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>3</span><br> <span
+								class="additional-info-percentages">(50.0%)</span></td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(33.3%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(16.7%)</span></td>
+							<td><span>6</span><br> <span
+								class="additional-info-percentages">(100%)</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section
+				id="site-risk-counts">
+				<h3>Alert Counts by Site and Risk</h3>
+				<table class="site-risk-counts-table">
+					<caption>
+						<p>This table shows, for each site for which one or more alerts were raised, the number of alerts raised at each risk level.</p>
+						<p>Alerts with a confidence level of &quot;False Positive&quot; have been excluded from these counts.</p>
+						<p>(The numbers in brackets are the number of alerts raised for the site at or above that risk level.)</p>
+					</caption>
+					<colgroup>
+						<col>
+						<col>
+					</colgroup>
+					<colgroup>
+						<col
+							style="width: 16.25%"><col
+							style="width: 16.25%"><col
+							style="width: 16.25%"><col
+							style="width: 16.25%">
+					</colgroup>
+					<thead>
+						<tr>
+							<td colspan="2" rowspan="2"></td>
+							<th scope="colgroup" colspan="4">Risk</th>
+						</tr>
+						<tr>
+							<th scope="col">
+								<span>High</span><br>  <span
+									class="additional-info-percentages">(= High)</span>  
+							</th>
+							<th scope="col">
+								<span>Medium</span><br>   <span
+									class="additional-info-percentages">(&gt;= Medium)</span> 
+							</th>
+							<th scope="col">
+								<span>Low</span><br>   <span
+									class="additional-info-percentages">(&gt;= Low)</span> 
+							</th>
+							<th scope="col">
+								<span>Informational</span><br>   <span
+									class="additional-info-percentages">(&gt;= Informational)</span> 
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="rowgroup"
+								rowspan="1">Site</th>
+							<th scope="row">https://wb-platform-dreamteam.azurewebsites.net</th>
+							
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0)</span></td>
+							<td><span>3</span><br> <span
+								class="additional-info-percentages">(3)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(4)</span></td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(6)</span></td>
+							
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section
+				id="alert-type-counts">
+				<h3>Alert Counts by Alert Type</h3>
+				<table class="alert-type-counts-table">
+					<caption>
+						<p>This table shows the number of alerts of each alert type, together with the alert type&#39;s risk level.</p>
+						<p>(The percentages in brackets represent each count as a percentage, rounded to one decimal place, of the total number of alerts included in this report.)</p>
+					</caption>
+					<thead>
+						<tr>
+							<th scope="col">Alert type</th>
+							<th scope="col">Risk</th>
+							<th scope="col">Count</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-0">CSP: Failure to Define Directive with No Fallback</a></th>
+							<td class="risk-level">Medium</td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(33.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-1">CSP: style-src unsafe-inline</a></th>
+							<td class="risk-level">Medium</td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(33.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-2">Sub Resource Integrity Attribute Missing</a></th>
+							<td class="risk-level">Medium</td>
+							<td><span>4</span><br> <span
+								class="additional-info-percentages">(66.7%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-3">Cross-Domain JavaScript Source File Inclusion</a></th>
+							<td class="risk-level">Low</td>
+							<td><span>4</span><br> <span
+								class="additional-info-percentages">(66.7%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-4">Information Disclosure - Suspicious Comments</a></th>
+							<td class="risk-level">Informational</td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(16.7%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-5">Re-examine Cache-control Directives</a></th>
+							<td class="risk-level">Informational</td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(33.3%)</span></td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th scope="row">Total</th>
+							<td></td>
+							<td>6</td>
+						</tr>
+					</tfoot>
+				</table>
+			</section>
+			
+			<section
+				id="insights">
+				<h3 class="left-header">Insights</h3>
+				<table class="insights-table">
+						<caption>
+						<p>This table shows information that is likely to be very relevant to you, but which is not related to vulnerabilities, or potentially even related to the application in question.</p>
+					</caption>
+					<thead>
+					<tr>
+						<th scope="col">Level</th>
+						<th scope="col">Reason</th>
+						<th scope="col">Site</th>
+						<th scope="col">Description</th>
+						<th scope="col">Statistic</th>
+					</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+						<td class="risk-1">
+							<div>Low</div>
+						</td>
+						<td>
+							<div>Warning</div>
+						</td>
+						<td>
+							<div></div>
+						</td>
+						<td>
+							<div>ZAP errors logged - see the zap.log file for details</div>
+						</td>
+						<td align="center">
+							<div>4   </div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-1">
+							<div>Low</div>
+						</td>
+						<td>
+							<div>Warning</div>
+						</td>
+						<td>
+							<div></div>
+						</td>
+						<td>
+							<div>ZAP warnings logged - see the zap.log file for details</div>
+						</td>
+						<td align="center">
+							<div>6   </div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-1">
+							<div>Low</div>
+						</td>
+						<td>
+							<div>Exceeded Low</div>
+						</td>
+						<td>
+							<div></div>
+						</td>
+						<td>
+							<div>Percentage of network failures</div>
+						</td>
+						<td align="center">
+							<div>7 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>http://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 3xx</div>
+						</td>
+						<td align="center">
+							<div>100 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://cdn.jsdelivr.net</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 2xx</div>
+						</td>
+						<td align="center">
+							<div>100 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://cdn.jsdelivr.net</div>
+						</td>
+						<td>
+							<div>Percentage of slow responses</div>
+						</td>
+						<td align="center">
+							<div>33 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://js.hcaptcha.com</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 2xx</div>
+						</td>
+						<td align="center">
+							<div>100 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://js.hcaptcha.com</div>
+						</td>
+						<td>
+							<div>Percentage of slow responses</div>
+						</td>
+						<td align="center">
+							<div>42 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 2xx</div>
+						</td>
+						<td align="center">
+							<div>78 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Exceeded Low</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 4xx</div>
+						</td>
+						<td align="center">
+							<div>15 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Exceeded Low</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of responses with status code 5xx</div>
+						</td>
+						<td align="center">
+							<div>5 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of endpoints with content type image/png</div>
+						</td>
+						<td align="center">
+							<div>9 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of endpoints with content type text/css</div>
+						</td>
+						<td align="center">
+							<div>27 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of endpoints with content type text/html</div>
+						</td>
+						<td align="center">
+							<div>9 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of endpoints with content type text/javascript</div>
+						</td>
+						<td align="center">
+							<div>36 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of endpoints with method GET</div>
+						</td>
+						<td align="center">
+							<div>100 %</div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Informational</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Count of total endpoints</div>
+						</td>
+						<td align="center">
+							<div>11   </div>
+						</td>
+						</tr>
+					
+						<tr>
+						<td class="risk-0">
+							<div>Info</div>
+						</td>
+						<td>
+							<div>Exceeded Low</div>
+						</td>
+						<td>
+							<div>https://wb-platform-dreamteam.azurewebsites.net</div>
+						</td>
+						<td>
+							<div>Percentage of slow responses</div>
+						</td>
+						<td align="center">
+							<div>26 %</div>
+						</td>
+						</tr>
+					
+					</tbody>
+				</table>
+			</section>
+		</section>
+
+		<section id="alerts" class="alerts">
+			<h2>Alerts</h2>
+			<ol>
+				
+				 
+				 
+				
+				
+				<li id="alerts--risk-2-confidence-3">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Medium</span>, <span>Confidence</span>=<span
+							class="confidence-level">High</span> <span>(3)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://wb-platform-dreamteam.azurewebsites.net</span> <span>(3)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-0">CSP: Failure to Define Directive with No Fallback</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">OWASP_2021_A05</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_QA_STD = </span>
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://www.zaproxy.org/docs/desktop/addons/common-library/alerttags/#systemic">SYSTEMIC</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/693.html">CWE-693</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration.html">OWASP_2017_A06</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A02_2025-Security_Misconfiguration/">OWASP_2025_A02</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_DEV_STD = </span>
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The Content Security Policy fails to define one of the directives that has no fallback. Missing/excluding them is the same as allowing anything.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>The directive(s): form-action is/are among the directives that do not fallback to default-src.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (279 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (857 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 1408
+Content-Type: text/html
+Date: Mon, 27 Apr 2026 21:15:09 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b571e80&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (1408 bytes)</summary>
+				
+				<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;WhistleblowerPlatform.Client&lt;/title&gt;
+    &lt;base href=&quot;/&quot; /&gt;
+    &lt;link rel=&quot;preload&quot; id=&quot;webassembly&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/dist/css/bootstrap.min.css&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/app.css&quot; /&gt;
+    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;favicon.png&quot; /&gt;
+    &lt;link href=&quot;WhistleblowerPlatform.Client.styles.css&quot; rel=&quot;stylesheet&quot; /&gt;
+    &lt;script type=&quot;importmap&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;svg class=&quot;loading-progress&quot;&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+        &lt;/svg&gt;
+        &lt;div class=&quot;loading-progress-text&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;blazor-error-ui&quot;&gt;
+        An unhandled error has occurred.
+        &lt;a href=&quot;.&quot; class=&quot;reload&quot;&gt;Reload&lt;/a&gt;
+        &lt;span class=&quot;dismiss&quot;&gt;🗙&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;js/hcaptcha-interop.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;_framework/blazor.webassembly.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;lib/bootstrap/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;js/crypto.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/argon2-browser@1.18.0/dist/argon2-bundled.min.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>Content-Security-Policy</code></pre></td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-1">CSP: style-src unsafe-inline</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">OWASP_2021_A05</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_QA_STD = </span>
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://www.zaproxy.org/docs/desktop/addons/common-library/alerttags/#systemic">SYSTEMIC</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/693.html">CWE-693</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration.html">OWASP_2017_A06</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A02_2025-Security_Misconfiguration/">OWASP_2025_A02</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_DEV_STD = </span>
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks. Including (but not limited to) Cross Site Scripting (XSS), and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>style-src includes unsafe-inline.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (279 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (857 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 1408
+Content-Type: text/html
+Date: Mon, 27 Apr 2026 21:15:09 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b571e80&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (1408 bytes)</summary>
+				
+				<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;WhistleblowerPlatform.Client&lt;/title&gt;
+    &lt;base href=&quot;/&quot; /&gt;
+    &lt;link rel=&quot;preload&quot; id=&quot;webassembly&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/dist/css/bootstrap.min.css&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/app.css&quot; /&gt;
+    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;favicon.png&quot; /&gt;
+    &lt;link href=&quot;WhistleblowerPlatform.Client.styles.css&quot; rel=&quot;stylesheet&quot; /&gt;
+    &lt;script type=&quot;importmap&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;svg class=&quot;loading-progress&quot;&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+        &lt;/svg&gt;
+        &lt;div class=&quot;loading-progress-text&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;blazor-error-ui&quot;&gt;
+        An unhandled error has occurred.
+        &lt;a href=&quot;.&quot; class=&quot;reload&quot;&gt;Reload&lt;/a&gt;
+        &lt;span class=&quot;dismiss&quot;&gt;🗙&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;js/hcaptcha-interop.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;_framework/blazor.webassembly.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;lib/bootstrap/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;js/crypto.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/argon2-browser@1.18.0/dist/argon2-bundled.min.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>Content-Security-Policy</code></pre></td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-2">Sub Resource Integrity Attribute Missing</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/345.html">CWE-345</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">OWASP_2021_A05</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_QA_STD = </span>
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://www.zaproxy.org/docs/desktop/addons/common-library/alerttags/#systemic">SYSTEMIC</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration.html">OWASP_2017_A06</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A02_2025-Security_Misconfiguration/">OWASP_2025_A02</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_DEV_STD = </span>
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The integrity attribute is missing on a script or link tag served by an external server. The integrity tag prevents an attacker who have gained access to this server from injecting a malicious content.</p>
+ </td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (279 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (857 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 1408
+Content-Type: text/html
+Date: Mon, 27 Apr 2026 21:15:09 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b571e80&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (1408 bytes)</summary>
+				
+				<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;WhistleblowerPlatform.Client&lt;/title&gt;
+    &lt;base href=&quot;/&quot; /&gt;
+    &lt;link rel=&quot;preload&quot; id=&quot;webassembly&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/dist/css/bootstrap.min.css&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/app.css&quot; /&gt;
+    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;favicon.png&quot; /&gt;
+    &lt;link href=&quot;WhistleblowerPlatform.Client.styles.css&quot; rel=&quot;stylesheet&quot; /&gt;
+    &lt;script type=&quot;importmap&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;svg class=&quot;loading-progress&quot;&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+        &lt;/svg&gt;
+        &lt;div class=&quot;loading-progress-text&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;blazor-error-ui&quot;&gt;
+        An unhandled error has occurred.
+        &lt;a href=&quot;.&quot; class=&quot;reload&quot;&gt;Reload&lt;/a&gt;
+        &lt;span class=&quot;dismiss&quot;&gt;🗙&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;js/hcaptcha-interop.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;_framework/blazor.webassembly.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;lib/bootstrap/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;js/crypto.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/argon2-browser@1.18.0/dist/argon2-bundled.min.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>&lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Provide a valid integrity attribute to the tag.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				
+				
+				
+				  
+				 
+				
+				
+				
+				
+				<li id="alerts--risk-1-confidence-2">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Low</span>, <span>Confidence</span>=<span
+							class="confidence-level">Medium</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://wb-platform-dreamteam.azurewebsites.net</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-3">Cross-Domain JavaScript Source File Inclusion</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A08_2025-Software_or_Data_Integrity_Failures/">OWASP_2025_A08</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_QA_STD = </span>
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://www.zaproxy.org/docs/desktop/addons/common-library/alerttags/#systemic">SYSTEMIC</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures/">OWASP_2021_A08</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/829.html">CWE-829</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_DEV_STD = </span>
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The page includes one or more script files from a third-party domain.</p>
+ </td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (279 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (857 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 1408
+Content-Type: text/html
+Date: Mon, 27 Apr 2026 21:15:09 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b571e80&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (1408 bytes)</summary>
+				
+				<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;WhistleblowerPlatform.Client&lt;/title&gt;
+    &lt;base href=&quot;/&quot; /&gt;
+    &lt;link rel=&quot;preload&quot; id=&quot;webassembly&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/dist/css/bootstrap.min.css&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/app.css&quot; /&gt;
+    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;favicon.png&quot; /&gt;
+    &lt;link href=&quot;WhistleblowerPlatform.Client.styles.css&quot; rel=&quot;stylesheet&quot; /&gt;
+    &lt;script type=&quot;importmap&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;svg class=&quot;loading-progress&quot;&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+        &lt;/svg&gt;
+        &lt;div class=&quot;loading-progress-text&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;blazor-error-ui&quot;&gt;
+        An unhandled error has occurred.
+        &lt;a href=&quot;.&quot; class=&quot;reload&quot;&gt;Reload&lt;/a&gt;
+        &lt;span class=&quot;dismiss&quot;&gt;🗙&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;js/hcaptcha-interop.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;_framework/blazor.webassembly.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;lib/bootstrap/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;js/crypto.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/argon2-browser@1.18.0/dist/argon2-bundled.min.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>https://js.hcaptcha.com/1/api.js</code></pre></td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>&lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure JavaScript source files are loaded from only trusted sources, and the sources can&#39;t be controlled by end users of the application.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				
+				  
+				 
+				
+				
+				
+				
+				<li id="alerts--risk-0-confidence-2">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Informational</span>, <span>Confidence</span>=<span
+							class="confidence-level">Medium</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://wb-platform-dreamteam.azurewebsites.net</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-4">Information Disclosure - Suspicious Comments</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net/js/crypto.js</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/A01_2021-Broken_Access_Control/">OWASP_2021_A01</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/05-Review_Webpage_Content_for_Information_Leakage">WSTG-v42-INFO-05</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure.html">OWASP_2017_A03</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/">OWASP_2025_A01</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/615.html">CWE-615</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The response appears to contain suspicious comments which may help an attacker.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>The following pattern was used: \bFROM\b and was detected 2 times, the first in likely comment: &quot;//Crypto service - to put here web crypto api functions to be called from blazor&quot;, see evidence field for the suspicious comment/snippet.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (350 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net/js/crypto.js HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+referer: https://wb-platform-dreamteam.azurewebsites.net
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (864 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 12156
+Content-Type: text/javascript
+Date: Mon, 27 Apr 2026 21:15:09 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b57347c&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body">
+				<summary>Response body (12156 bytes)</summary>
+				
+				<pre><code>﻿//Crypto service - to put here web crypto api functions to be called from blazor
+
+window.cryptoService = {
+
+    // Generate a 32-byte random token
+    generateToken: async function () {
+        const bytes = new Uint8Array(32);
+        crypto.getRandomValues(bytes);
+        return this._toBase64(bytes);
+    },
+
+    // SHA-256 hash (returns base64)
+    hashToken: async function (tokenBase64) {
+        const tokenBytes = this._fromBase64(tokenBase64);
+        const hashBuffer = await crypto.subtle.digest(&quot;SHA-256&quot;, tokenBytes);
+        return this._toBase64(new Uint8Array(hashBuffer));
+    },
+
+    // Generate AES-256-GCM symmetric key (returns base64 of raw key bytes)
+    generateSymmetricKey: async function () {
+        const key = await crypto.subtle.generateKey(
+            { name: &quot;AES-GCM&quot;, length: 256 },
+            true,
+            [&quot;encrypt&quot;, &quot;decrypt&quot;]
+        );
+        const rawKey = await crypto.subtle.exportKey(&quot;raw&quot;, key);
+        return this._toBase64(new Uint8Array(rawKey));
+    },
+
+    // Encrypt with AES-256-GCM (returns { iv, ciphertext, authTag } as base64)
+    encryptSymmetric: async function (plaintextBase64, keyBase64) {
+        const key = await this._importAesKey(keyBase64);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const plaintext = this._fromBase64(plaintextBase64);
+
+        const encrypted = await crypto.subtle.encrypt(
+            { name: &quot;AES-GCM&quot;, iv: iv },
+            key,
+            plaintext
+        );
+
+        const encryptedArray = new Uint8Array(encrypted);
+        const ciphertext = encryptedArray.slice(0, encryptedArray.length - 16);
+        const authTag = encryptedArray.slice(encryptedArray.length - 16);
+
+        return {
+            iv: this._toBase64(iv),
+            ciphertext: this._toBase64(ciphertext),
+            authTag: this._toBase64(authTag)
+        };
+    },
+
+    // Generate RSA-OAEP 4096-bit keypair
+    generateKeypair: async function () {
+        const keypair = await crypto.subtle.generateKey(
+            {
+                name: &quot;RSA-OAEP&quot;,
+                modulusLength: 4096,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: &quot;SHA-256&quot;
+            },
+            true,
+            [&quot;encrypt&quot;, &quot;decrypt&quot;]
+        );
+
+        const publicKeyBuffer = await crypto.subtle.exportKey(&quot;spki&quot;, keypair.publicKey);
+        const privateKeyBuffer = await crypto.subtle.exportKey(&quot;pkcs8&quot;, keypair.privateKey);
+
+        return {
+            publicKey: this._toBase64(new Uint8Array(publicKeyBuffer)),
+            privateKey: this._toBase64(new Uint8Array(privateKeyBuffer))
+        };
+    },
+
+    // Encrypt symmetric key with RSA-OAEP public key
+    encryptWithPublicKey: async function (dataBase64, publicKeyBase64) {
+        const publicKey = await crypto.subtle.importKey(
+            &quot;spki&quot;,
+            this._fromBase64(publicKeyBase64),
+            { name: &quot;RSA-OAEP&quot;, hash: &quot;SHA-256&quot; },
+            false,
+            [&quot;encrypt&quot;]
+        );
+
+        const data = this._fromBase64(dataBase64);
+        const encrypted = await crypto.subtle.encrypt(
+            { name: &quot;RSA-OAEP&quot; },
+            publicKey,
+            data
+        );
+
+        return this._toBase64(new Uint8Array(encrypted));
+    },
+
+    // Encrypt private key with AES-256-GCM wrapping key
+    encryptPrivateKey: async function (privateKeyBase64, wrappingKeyBase64) {
+        return await this.encryptSymmetric(privateKeyBase64, wrappingKeyBase64);
+    },
+
+    // SHA-256 fingerprint of a public key
+    fingerprintPublicKey: async function (publicKeyBase64) {
+        const keyBytes = this._fromBase64(publicKeyBase64);
+        const hash = await crypto.subtle.digest(&quot;SHA-256&quot;, keyBytes);
+        return this._toBase64(new Uint8Array(hash));
+    },
+
+    // Convert string to base64 (UTF-8)
+    stringToBase64: function (str) {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(str);
+        return this._toBase64(bytes);
+    },
+
+    // File encryption (original — single encryption)
+    encryptFile: async function (fileContentBase64, fileNameBase64, keyBase64) {
+        const payload = JSON.stringify({
+            fileName: fileNameBase64,
+            content: fileContentBase64
+        });
+        const encoder = new TextEncoder();
+        const payloadBytes = encoder.encode(payload);
+        const payloadBase64 = this._toBase64(payloadBytes);
+        return await this.encryptSymmetric(payloadBase64, keyBase64);
+    },
+
+    // File encryption for sanitization (dual encryption — ADR-001)
+    encryptFileForSanitization: async function (fileContentBase64, fileNameBase64, investigatorPublicKeyBase64, wbPublicKeyBase64) {
+
+        // Bundle filename and content into a JSON payload
+        const payload = JSON.stringify({
+            fileName: fileNameBase64,
+            content: fileContentBase64
+        });
+        const payloadBytes = new TextEncoder().encode(payload);
+        const payloadBase64 = this._toBase64(payloadBytes);
+
+        // =========================================================
+        // 1. SANITIZATION ENCRYPTION
+        // =========================================================
+
+        const sanitizationKeyBase64 = await this.generateSymmetricKey();
+        const sanitizationEncrypted = await this.encryptSymmetric(payloadBase64, sanitizationKeyBase64);
+
+        // =========================================================
+        // 2. RECIPIENT ENCRYPTION
+        // =========================================================
+
+        const recipientKeyBase64 = await this.generateSymmetricKey();
+        const recipientEncrypted = await this.encryptSymmetric(payloadBase64, recipientKeyBase64);
+
+        // Wrap recipient key with investigator&#39;s public key
+        const keyEnvelope = await this.encryptWithPublicKey(recipientKeyBase64, investigatorPublicKeyBase64);
+
+        // Wrap recipient key with WB&#39;s public key
+        const wbKeyEnvelope = await this.encryptWithPublicKey(recipientKeyBase64, wbPublicKeyBase64);
+
+        // =========================================================
+        // 3. RETURN ALL ENCRYPTED DATA
+        // =========================================================
+
+        return {
+            // Sanitization data (server can decrypt)
+            sanitizationBlob: sanitizationEncrypted,
+            sanitizationKey: sanitizationKeyBase64,
+
+            // Recipient data (investigator + WB can decrypt)
+            recipientBlob: recipientEncrypted,
+            keyEnvelope: keyEnvelope,
+            wbKeyEnvelope: wbKeyEnvelope
+        };
+    },
+
+    // Derive 256-bit AES wrapping key from password via Argon2id
+    // Returns base64 of derived key bytes
+    deriveWrappingKey: async function (password, saltBase64) {
+        const salt = this._fromBase64(saltBase64);
+        const result = await argon2.hash({
+            pass: password,
+            salt: salt,
+            type: argon2.ArgonType.Argon2id,
+            mem: 65536,       // 64 MB
+            time: 3,
+            parallelism: 4,
+            hashLen: 32
+        });
+        return this._toBase64(result.hash);
+    },
+
+    // Encrypt PKCS8 private key with AES-256-GCM wrapping key
+    // Returns { iv: base64(12 bytes), encryptedKey: base64(ciphertext+authTag) }
+    wrapPrivateKey: async function (privateKeyBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const plaintext = this._fromBase64(privateKeyBase64);
+        const encrypted = await crypto.subtle.encrypt({ name: &quot;AES-GCM&quot;, iv }, key, plaintext);
+        return {
+            iv: this._toBase64(iv),
+            encryptedKey: this._toBase64(new Uint8Array(encrypted))
+        };
+    },
+
+    // Decrypt PKCS8 private key — returns base64 of plaintext key bytes
+    unwrapPrivateKey: async function (encryptedKeyBase64, ivBase64, wrappingKeyBase64) {
+        const key = await this._importAesKey(wrappingKeyBase64);
+        const iv = this._fromBase64(ivBase64);
+        const ciphertext = this._fromBase64(encryptedKeyBase64);
+        const decrypted = await crypto.subtle.decrypt({ name: &quot;AES-GCM&quot;, iv }, key, ciphertext);
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt data with RSA-OAEP private key — returns base64 of plaintext
+    decryptWithPrivateKey: async function (encryptedBase64, privateKeyBase64) {
+        const privateKey = await crypto.subtle.importKey(
+            &quot;pkcs8&quot;,
+            this._fromBase64(privateKeyBase64),
+            { name: &quot;RSA-OAEP&quot;, hash: &quot;SHA-256&quot; },
+            false,
+            [&quot;decrypt&quot;]
+        );
+        const decrypted = await crypto.subtle.decrypt(
+            { name: &quot;RSA-OAEP&quot; },
+            privateKey,
+            this._fromBase64(encryptedBase64)
+        );
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt AES-256-GCM — returns base64 of plaintext bytes
+    decryptSymmetric: async function (ivBase64, ciphertextBase64, authTagBase64, keyBase64) {
+        const key = await this._importAesKey(keyBase64);
+        const ciphertext = this._fromBase64(ciphertextBase64);
+        const authTag = this._fromBase64(authTagBase64);
+        const combined = new Uint8Array(ciphertext.length + authTag.length);
+        combined.set(ciphertext);
+        combined.set(authTag, ciphertext.length);
+        const decrypted = await crypto.subtle.decrypt(
+            { name: &quot;AES-GCM&quot;, iv: this._fromBase64(ivBase64) },
+            key,
+            combined
+        );
+        return this._toBase64(new Uint8Array(decrypted));
+    },
+
+    // Decrypt a file attachment — returns { fileName, contentBase64 }
+    // Handles both pre-sanitization (camelCase keys, base64-encoded fileName)
+    // and post-sanitization (PascalCase keys, plain fileName) payload formats.
+    decryptFileAttachment: async function (ivBase64, ciphertextBase64, authTagBase64, keyEnvelopeBase64, privateKeyBase64) {
+        const symmetricKey = await this.decryptWithPrivateKey(keyEnvelopeBase64, privateKeyBase64);
+        const payloadBase64 = await this.decryptSymmetric(ivBase64, ciphertextBase64, authTagBase64, symmetricKey);
+        const payloadJson = new TextDecoder().decode(this._fromBase64(payloadBase64));
+        const payload = JSON.parse(payloadJson);
+        const rawFileName = payload.fileName ?? payload.FileName ?? &quot;download&quot;;
+        let fileName;
+        try {
+            const decoded = new TextDecoder().decode(this._fromBase64(rawFileName));
+            fileName = /^[\x20-\x7E\u00A0-\uFFFF]+$/.test(decoded) ? decoded : rawFileName;
+        } catch {
+            fileName = rawFileName;
+        }
+        return { fileName, contentBase64: payload.content ?? payload.Content ?? &quot;&quot; };
+    },
+
+    // Trigger a browser file download
+    downloadFile: function (contentBase64, fileName, mimeType) {
+        const bytes = this._fromBase64(contentBase64);
+        const blob = new Blob([bytes], { type: mimeType || &quot;application/octet-stream&quot; });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(&quot;a&quot;);
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
+    // ---- Helper functions ----
+
+    _importAesKey: async function (keyBase64) {
+        const keyBytes = this._fromBase64(keyBase64);
+        return await crypto.subtle.importKey(
+            &quot;raw&quot;,
+            keyBytes,
+            { name: &quot;AES-GCM&quot;, length: 256 },
+            false,
+            [&quot;encrypt&quot;, &quot;decrypt&quot;]
+        );
+    },
+
+    _toBase64: function (uint8Array) {
+        let binary = &quot;&quot;;
+        for (let i = 0; i &lt; uint8Array.length; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+        }
+        return btoa(binary);
+    },
+
+    _fromBase64: function (base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i &lt; binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    }
+};</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>ctions to be called from blazor</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				<li id="alerts--risk-0-confidence-1">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Informational</span>, <span>Confidence</span>=<span
+							class="confidence-level">Low</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://wb-platform-dreamteam.azurewebsites.net</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-5">Re-examine Cache-control Directives</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://wb-platform-dreamteam.azurewebsites.net</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/2025/A07_2025-Authentication_Failures/">OWASP_2025_A07</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/525.html">CWE-525</a></span> 
+				</li>
+				<li>
+					 <span>POLICY_PENTEST = </span>
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/">OWASP_2021_A07</a></span> 
+				</li>
+				<li>
+					<span><a href="https://www.zaproxy.org/docs/desktop/addons/common-library/alerttags/#systemic">SYSTEMIC</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/04-Authentication_Testing/06-Testing_for_Browser_Cache_Weaknesses">WSTG-v42-ATHN-06</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A2_2017-Broken_Authentication.html">OWASP_2017_A02</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.</p>
+ </td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (279 bytes)</summary>
+				
+				<pre><code>GET https://wb-platform-dreamteam.azurewebsites.net HTTP/1.1
+host: wb-platform-dreamteam.azurewebsites.net
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+pragma: no-cache
+cache-control: no-cache
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (857 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+Content-Length: 1408
+Content-Type: text/html
+Date: Mon, 27 Apr 2026 21:15:08 GMT
+Server: Kestrel
+Accept-Ranges: bytes
+ETag: &quot;1dcd5bf0b571e80&quot;
+Last-Modified: Sun, 26 Apr 2026 20:55:42 GMT
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; https://cdn.jsdelivr.net https://js.hcaptcha.com; style-src &#39;self&#39; &#39;unsafe-inline&#39;; img-src &#39;self&#39; data: https://*.hcaptcha.com; font-src &#39;self&#39;; connect-src &#39;self&#39; https://hcaptcha.com https://*.hcaptcha.com; frame-src https://newassets.hcaptcha.com; frame-ancestors &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (1408 bytes)</summary>
+				
+				<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;WhistleblowerPlatform.Client&lt;/title&gt;
+    &lt;base href=&quot;/&quot; /&gt;
+    &lt;link rel=&quot;preload&quot; id=&quot;webassembly&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;lib/bootstrap/dist/css/bootstrap.min.css&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/app.css&quot; /&gt;
+    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;favicon.png&quot; /&gt;
+    &lt;link href=&quot;WhistleblowerPlatform.Client.styles.css&quot; rel=&quot;stylesheet&quot; /&gt;
+    &lt;script type=&quot;importmap&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://js.hcaptcha.com/1/api.js&quot; async defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;svg class=&quot;loading-progress&quot;&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+            &lt;circle r=&quot;40%&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; /&gt;
+        &lt;/svg&gt;
+        &lt;div class=&quot;loading-progress-text&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;blazor-error-ui&quot;&gt;
+        An unhandled error has occurred.
+        &lt;a href=&quot;.&quot; class=&quot;reload&quot;&gt;Reload&lt;/a&gt;
+        &lt;span class=&quot;dismiss&quot;&gt;🗙&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;js/hcaptcha-interop.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;_framework/blazor.webassembly.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;lib/bootstrap/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;js/crypto.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/argon2-browser@1.18.0/dist/argon2-bundled.min.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>cache-control</code></pre></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>For secure content, ensure the cache-control HTTP header is set with &quot;no-cache, no-store, must-revalidate&quot;. If an asset should be cached consider setting the directives &quot;public, max-age, immutable&quot;.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				  
+			</ol>
+		</section>
+
+		<section id="appendix" class="appendix">
+			<h2>Appendix</h2>
+
+			<section id="alert-types" class="alert-types">
+				<h3>Alert Types</h3>
+				<p class="alert-types-intro">This section contains additional information on the types of alerts in the report.</p>
+				<ol>
+					<li
+						id="alert-type-0">
+						<h4>CSP: Failure to Define Directive with No Fallback</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10055/">CSP</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/693.html">693</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://www.w3.org/TR/CSP/">https://www.w3.org/TR/CSP/</a></li>
+										<li><a
+											href="https://caniuse.com/#search=content+security+policy">https://caniuse.com/#search=content+security+policy</a></li>
+										<li><a
+											href="https://content-security-policy.com/">https://content-security-policy.com/</a></li>
+										<li><a
+											href="https://github.com/HtmlUnit/htmlunit-csp">https://github.com/HtmlUnit/htmlunit-csp</a></li>
+										<li><a
+											href="https://web.dev/articles/csp#resource-options">https://web.dev/articles/csp#resource-options</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-1">
+						<h4>CSP: style-src unsafe-inline</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10055/">CSP</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/693.html">693</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://www.w3.org/TR/CSP/">https://www.w3.org/TR/CSP/</a></li>
+										<li><a
+											href="https://caniuse.com/#search=content+security+policy">https://caniuse.com/#search=content+security+policy</a></li>
+										<li><a
+											href="https://content-security-policy.com/">https://content-security-policy.com/</a></li>
+										<li><a
+											href="https://github.com/HtmlUnit/htmlunit-csp">https://github.com/HtmlUnit/htmlunit-csp</a></li>
+										<li><a
+											href="https://web.dev/articles/csp#resource-options">https://web.dev/articles/csp#resource-options</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-2">
+						<h4>Sub Resource Integrity Attribute Missing</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/90003/">Sub Resource Integrity Attribute Missing</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/345.html">345</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity">https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-3">
+						<h4>Cross-Domain JavaScript Source File Inclusion</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10017/">Cross-Domain JavaScript Source File Inclusion</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/829.html">829</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							
+						</table>
+					</li>
+					<li
+						id="alert-type-4">
+						<h4>Information Disclosure - Suspicious Comments</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10027/">Information Disclosure - Suspicious Comments</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/615.html">615</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>13</td>
+							</tr>
+							
+						</table>
+					</li>
+					<li
+						id="alert-type-5">
+						<h4>Re-examine Cache-control Directives</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10015/">Re-examine Cache-control Directives</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/525.html">525</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>13</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching">https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching</a></li>
+										<li><a
+											href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control">https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control</a></li>
+										<li><a
+											href="https://grayduck.mn/2021/09/13/cache-control-recommendations/">https://grayduck.mn/2021/09/13/cache-control-recommendations/</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+				</ol>
+			</section>
+		</section>
+		 
+	</main>
+</body>
+</html>
+
+
+
