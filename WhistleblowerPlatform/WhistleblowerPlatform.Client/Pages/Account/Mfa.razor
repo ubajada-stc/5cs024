@@ -1,0 +1,225 @@
+@page "/account/mfa"
+@using WhistleblowerPlatform.Client.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="hero-section">
+    <div style="max-width: 600px; margin: 0 auto;">
+
+        <div class="text-center mb-5">
+            <h1>Two-Factor Authentication</h1>
+            <p class="lead">Protect your account with an authenticator app.</p>
+        </div>
+
+        @if (_loading)
+        {
+            <div class="submit-form-card text-center" style="color: var(--color-muted-fg);">
+                <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+            </div>
+        }
+        else if (_mfaEnabled)
+        {
+            <!-- MFA enabled state -->
+            <div class="submit-form-card">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <span class="badge bg-success" style="font-size: 0.9rem; padding: 0.5rem 1rem;">MFA Enabled</span>
+                    <span style="color: var(--color-muted-fg); font-size: 0.9rem;">Your account is protected with two-factor authentication.</span>
+                </div>
+
+                <div style="border-top: 1px solid var(--color-border); padding-top: 1.5rem;">
+                    <p style="font-size: 0.9rem; color: var(--color-muted-fg); margin-bottom: 1rem;">
+                        To disable MFA, enter the current 6-digit code from your authenticator app.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Authenticator Code</label>
+                        <input type="text" class="form-control" style="font-family: monospace; letter-spacing: 0.2em;"
+                               placeholder="000000" maxlength="6"
+                               @bind="_disableCode" @bind:event="oninput" />
+                    </div>
+                    @if (_error != null)
+                    {
+                        <div class="alert alert-danger mb-3">@_error</div>
+                    }
+                    <button class="btn btn-outline-danger w-100"
+                            style="border-radius: var(--radius-lg); padding: 0.85rem; font-weight: 500;"
+                            @onclick="HandleDisable"
+                            disabled="@(_working || _disableCode.Length != 6)">
+                        @if (_working)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Disable Two-Factor Authentication
+                    </button>
+                </div>
+            </div>
+        }
+        else if (_setup == null)
+        {
+            <!-- MFA disabled, not yet started setup -->
+            <div class="submit-form-card">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <span class="badge bg-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">MFA Disabled</span>
+                    <span style="color: var(--color-muted-fg); font-size: 0.9rem;">Add an extra layer of security to your account.</span>
+                </div>
+
+                <div class="info-panel mb-4">
+                    <strong style="color: var(--color-foreground); font-size: 0.9rem;">What you'll need</strong>
+                    <ul>
+                        <li>An authenticator app such as Google Authenticator, Microsoft Authenticator, or Authy.</li>
+                        <li>Once enabled, you will be asked for a 6-digit code every time you log in.</li>
+                    </ul>
+                </div>
+
+                @if (_error != null)
+                {
+                    <div class="alert alert-danger mb-3">@_error</div>
+                }
+
+                <button class="btn btn-submit w-100" @onclick="HandleStartSetup" disabled="@_working">
+                    @if (_working)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Enable Two-Factor Authentication
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- QR code scan + confirm step -->
+            <div class="submit-form-card">
+                <div style="font-size: 0.8rem; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">Step 1 — Scan the QR code</div>
+
+                <div class="text-center mb-4">
+                    <img src="data:image/png;base64,@_setup.QrCodeBase64"
+                         alt="MFA QR Code"
+                         style="width: 200px; height: 200px; border-radius: var(--radius-lg); border: 1px solid var(--color-border);" />
+                </div>
+
+                <div class="identity-panel mb-4">
+                    <div style="font-size: 0.8rem; color: var(--color-muted-fg); margin-bottom: 0.4rem;">Can't scan? Enter this key manually:</div>
+                    <code style="font-size: 0.9rem; word-break: break-all; color: var(--color-foreground);">@_setup.Secret</code>
+                </div>
+
+                <div style="font-size: 0.8rem; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Step 2 — Confirm with your app</div>
+
+                <div class="mb-4">
+                    <label class="form-label">Enter the 6-digit code from your authenticator app</label>
+                    <input type="text" class="form-control" style="font-family: monospace; letter-spacing: 0.2em;"
+                           placeholder="000000" maxlength="6"
+                           @bind="_confirmCode" @bind:event="oninput" />
+                </div>
+
+                @if (_error != null)
+                {
+                    <div class="alert alert-danger mb-3">@_error</div>
+                }
+
+                <div class="d-flex gap-3">
+                    <button class="btn btn-outline-secondary flex-grow-1"
+                            style="border-radius: var(--radius-lg); padding: 0.85rem;"
+                            @onclick="HandleCancelSetup" disabled="@_working">
+                        Cancel
+                    </button>
+                    <button class="btn btn-submit flex-grow-1"
+                            @onclick="HandleConfirm"
+                            disabled="@(_working || _confirmCode.Length != 6)">
+                        @if (_working)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Activate
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="text-center mt-4">
+            <a href="@(_backUrl)" style="color: var(--color-muted-fg); font-size: 0.9rem;">&larr; Back</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _loading = true;
+    private bool _working = false;
+    private bool _mfaEnabled = false;
+    private MfaSetupResponse? _setup;
+    private string _confirmCode = "";
+    private string _disableCode = "";
+    private string? _error;
+
+    private string _backUrl => AuthService.Role == "Admin" ? "/admin/dashboard" : "/investigator/cases";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.AccessToken == null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        _mfaEnabled = await AuthService.GetMfaStatusAsync();
+        _loading = false;
+    }
+
+    private async Task HandleStartSetup()
+    {
+        _working = true;
+        _error = null;
+        try
+        {
+            _setup = await AuthService.GetMfaSetupAsync();
+            if (_setup == null) _error = "Failed to generate QR code. Please try again.";
+        }
+        finally { _working = false; }
+    }
+
+    private void HandleCancelSetup()
+    {
+        _setup = null;
+        _confirmCode = "";
+        _error = null;
+    }
+
+    private async Task HandleConfirm()
+    {
+        _working = true;
+        _error = null;
+        try
+        {
+            var (ok, err) = await AuthService.ConfirmMfaAsync(_setup!.Secret, _confirmCode);
+            if (ok)
+            {
+                _mfaEnabled = true;
+                _setup = null;
+                _confirmCode = "";
+            }
+            else
+            {
+                _error = err ?? "Invalid code. Please try again.";
+            }
+        }
+        finally { _working = false; }
+    }
+
+    private async Task HandleDisable()
+    {
+        _working = true;
+        _error = null;
+        try
+        {
+            var (ok, err) = await AuthService.DisableMfaAsync(_disableCode);
+            if (ok)
+            {
+                _mfaEnabled = false;
+                _disableCode = "";
+            }
+            else
+            {
+                _error = err ?? "Invalid code. Please try again.";
+                _disableCode = "";
+            }
+        }
+        finally { _working = false; }
+    }
+}

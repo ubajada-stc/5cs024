@@ -25,4 +25,13 @@ public class InvestigatorRepository : IInvestigatorRepository
             .Where(i => i.InvestigatorId == id)
             .ExecuteUpdateAsync(s => s.SetProperty(i => i.LastLoginAt, lastLoginAt));
     }
+
+    public async Task SaveMfaAsync(Guid id, string secret, bool enabled)
+    {
+        await _dbContext.Investigators
+            .Where(i => i.InvestigatorId == id)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(i => i.Mfasecret, secret)
+                .SetProperty(i => i.Mfaenabled, enabled));
+    }
 }

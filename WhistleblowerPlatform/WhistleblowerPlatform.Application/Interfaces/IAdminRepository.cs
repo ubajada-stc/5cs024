@@ -2,9 +2,9 @@ using WhistleblowerPlatform.Domain.Entities;
 
 namespace WhistleblowerPlatform.Application.Interfaces;
 
-public interface IInvestigatorRepository
+public interface IAdminRepository
 {
-    Task<Investigator?> GetByIdAsync(Guid id);
+    Task<Admin?> GetByIdAsync(Guid id);
     Task UpdateLastLoginAsync(Guid id, DateTime lastLoginAt);
     Task SaveMfaAsync(Guid id, string secret, bool enabled);
 }

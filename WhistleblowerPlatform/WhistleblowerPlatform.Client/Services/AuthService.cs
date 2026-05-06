@@ -53,6 +53,48 @@ public class AuthService
         return resp.IsSuccessStatusCode;
     }
 
+    public async Task<bool> GetMfaStatusAsync()
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, "/api/auth/mfa/status");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        using var resp = await _http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode) return false;
+        var result = await resp.Content.ReadFromJsonAsync<MfaStatusResponse>();
+        return result?.Enabled ?? false;
+    }
+
+    public async Task<MfaSetupResponse?> GetMfaSetupAsync()
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, "/api/auth/mfa/setup");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        using var resp = await _http.SendAsync(req);
+        return resp.IsSuccessStatusCode
+            ? await resp.Content.ReadFromJsonAsync<MfaSetupResponse>()
+            : null;
+    }
+
+    public async Task<(bool Success, string? Error)> ConfirmMfaAsync(string secret, string code)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/auth/mfa/confirm");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        req.Content = JsonContent.Create(new { secret, code });
+        using var resp = await _http.SendAsync(req);
+        if (resp.IsSuccessStatusCode) return (true, null);
+        var body = await resp.Content.ReadAsStringAsync();
+        return (false, body);
+    }
+
+    public async Task<(bool Success, string? Error)> DisableMfaAsync(string code)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/auth/mfa/disable");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        req.Content = JsonContent.Create(new { code });
+        using var resp = await _http.SendAsync(req);
+        if (resp.IsSuccessStatusCode) return (true, null);
+        var body = await resp.Content.ReadAsStringAsync();
+        return (false, body);
+    }
+
     public async Task LogoutAsync()
     {
         try
@@ -99,6 +141,17 @@ public class SetupKeypairRequest
 public class KeypairStatusResponse
 {
     public bool HasKeypair { get; set; }
+}
+
+public class MfaStatusResponse
+{
+    public bool Enabled { get; set; }
+}
+
+public class MfaSetupResponse
+{
+    public string Secret { get; set; } = "";
+    public string QrCodeBase64 { get; set; } = "";
 }
 
 public class EncryptedKeyResponse

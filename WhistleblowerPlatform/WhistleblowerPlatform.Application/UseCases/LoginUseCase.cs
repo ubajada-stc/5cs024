@@ -11,17 +11,20 @@ public class LoginUseCase
     private readonly ITokenService _tokenService;
     private readonly IMfaService _mfaService;
     private readonly IInvestigatorRepository _investigatorRepository;
+    private readonly IAdminRepository _adminRepository;
 
     public LoginUseCase(
         UserManager<ApplicationUser> userManager,
         ITokenService tokenService,
         IMfaService mfaService,
-        IInvestigatorRepository investigatorRepository)
+        IInvestigatorRepository investigatorRepository,
+        IAdminRepository adminRepository)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _mfaService = mfaService;
         _investigatorRepository = investigatorRepository;
+        _adminRepository = adminRepository;
     }
 
     public async Task<(LoginResponse Response, string? RawRefreshToken)> ExecuteAsync(LoginRequest request)
@@ -44,7 +47,21 @@ public class LoginUseCase
         if (user.AdminId.HasValue)
         {
             role = "Admin";
+            var admin = await _adminRepository.GetByIdAsync(user.AdminId.Value);
+
+            if (admin is not null && admin.Mfaenabled)
+            {
+                if (string.IsNullOrEmpty(request.TotpCode))
+                    return (new LoginResponse { Success = false, RequiresMfa = true }, null);
+
+                if (!_mfaService.ValidateTotpCode(admin.Mfasecret, request.TotpCode))
+                    return (Fail("Invalid MFA code."), null);
+            }
+
             await _userManager.ResetAccessFailedCountAsync(user);
+
+            if (admin is not null)
+                await _adminRepository.UpdateLastLoginAsync(admin.AdminId, DateTime.UtcNow);
         }
         else if (user.InvestigatorId.HasValue)
         {

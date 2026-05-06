@@ -71,6 +71,7 @@ builder.Services.AddScoped<LoginUseCase>();
 // Repositories
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IInvestigatorRepository, InvestigatorRepository>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 //BlobStorage
 var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "blob-storage");
