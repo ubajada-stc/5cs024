@@ -29,29 +29,39 @@
                 @if (_case.Status == 2)
                 {
                     <button class="btn btn-sm btn-outline-warning"
-                            @onclick="@(() => AdvanceStatus(3))"
+                            @onclick="@(() => RequestStatus(3))"
                             disabled="@_changingStatus">
-                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
                         Refer to Court
                     </button>
                     <button class="btn btn-sm btn-outline-secondary"
-                            @onclick="@(() => AdvanceStatus(4))"
+                            @onclick="@(() => RequestStatus(4))"
                             disabled="@_changingStatus">
-                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
                         Close
                     </button>
                 }
                 else if (_case.Status < 4)
                 {
                     <button class="btn btn-sm btn-outline-secondary"
-                            @onclick="@(() => AdvanceStatus((byte)(_case.Status + 1)))"
+                            @onclick="@(() => RequestStatus((byte)(_case.Status + 1)))"
                             disabled="@_changingStatus">
-                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
                         Move to @StatusLabel((byte)(_case.Status + 1))
                     </button>
                 }
             </div>
         </div>
+        @if (_showConfirm && _pendingStatus.HasValue)
+        {
+            <div class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-3" style="border-radius: var(--radius-lg);">
+                <span>Move case to <strong>@StatusLabel(_pendingStatus.Value)</strong>? This cannot be undone.</span>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button class="btn btn-sm btn-warning" @onclick="ConfirmStatus" disabled="@_changingStatus">
+                        @if (_changingStatus) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Confirm
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="CancelStatus" disabled="@_changingStatus">Cancel</button>
+                </div>
+            </div>
+        }
         @if (_statusError != null)
         {
             <div class="alert alert-danger p-2 small mb-3">@_statusError</div>
@@ -253,6 +263,8 @@
 
     private bool _changingStatus = false;
     private string? _statusError;
+    private byte? _pendingStatus;
+    private bool _showConfirm = false;
 
     private Dictionary<Guid, string> _decryptedMessages = new Dictionary<Guid, string>();
     private string _replyText = "";
@@ -404,6 +416,27 @@
             _downloadingOriginalId = null;
             StateHasChanged();
         }
+    }
+
+    private void RequestStatus(byte newStatus)
+    {
+        _pendingStatus = newStatus;
+        _showConfirm = true;
+        _statusError = null;
+    }
+
+    private void CancelStatus()
+    {
+        _pendingStatus = null;
+        _showConfirm = false;
+    }
+
+    private async Task ConfirmStatus()
+    {
+        if (!_pendingStatus.HasValue) return;
+        await AdvanceStatus(_pendingStatus.Value);
+        _pendingStatus = null;
+        _showConfirm = false;
     }
 
     private async Task AdvanceStatus(byte newStatus)

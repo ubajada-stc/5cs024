@@ -108,15 +108,30 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label">Name</label>
-                                    <input type="text" class="form-control" placeholder="Your full name" @bind="identityName" />
+                                    <input type="text" class="form-control @(nameError != null ? "is-invalid" : "")"
+                                           placeholder="Your full name" @bind="identityName" @bind:event="oninput" />
+                                    @if (nameError != null)
+                                    {
+                                        <div class="validation-message">@nameError</div>
+                                    }
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" placeholder="your@email.com" @bind="identityEmail" />
+                                    <input type="email" class="form-control @(emailError != null ? "is-invalid" : "")"
+                                           placeholder="your@email.com" @bind="identityEmail" @bind:event="oninput" />
+                                    @if (emailError != null)
+                                    {
+                                        <div class="validation-message">@emailError</div>
+                                    }
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Phone</label>
-                                    <input type="tel" class="form-control" placeholder="+1 555 000 0000" @bind="identityPhone" />
+                                    <input type="tel" class="form-control @(phoneError != null ? "is-invalid" : "")"
+                                           placeholder="+1 555 000 0000" @bind="identityPhone" @bind:event="oninput" />
+                                    @if (phoneError != null)
+                                    {
+                                        <div class="validation-message">@phoneError</div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -215,6 +230,9 @@
     private string identityEmail = "";
     private string identityPhone = "";
     private bool showIdentity = false;
+    private string? nameError;
+    private string? emailError;
+    private string? phoneError;
     private string? errorMessage;
     private string? fileError;
     private bool isSubmitting = false;
@@ -327,6 +345,27 @@
                 errorMessage = $"Total attachments cannot exceed 5GB (current: {FormatFileSize(totalSize)})";
                 return;
             }
+
+            // Validate optional identity fields
+            nameError = null;
+            emailError = null;
+            phoneError = null;
+
+            if (!string.IsNullOrWhiteSpace(identityName) && identityName.Trim().Length < 2)
+                nameError = "Name must be at least 2 characters.";
+
+            if (!string.IsNullOrWhiteSpace(identityEmail) &&
+                !System.Text.RegularExpressions.Regex.IsMatch(identityEmail.Trim(),
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                emailError = "Please enter a valid email address.";
+
+            if (!string.IsNullOrWhiteSpace(identityPhone) &&
+                !System.Text.RegularExpressions.Regex.IsMatch(identityPhone.Trim(),
+                    @"^[\+\d][\d\s\-\(\)\.]{6,19}$"))
+                phoneError = "Please enter a valid phone number.";
+
+            if (nameError != null || emailError != null || phoneError != null)
+                return;
 
             // Form is valid → Show CAPTCHA modal
             captchaError = null;
