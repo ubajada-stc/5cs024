@@ -1,13 +1,22 @@
 @page "/admin/dashboard"
 @using WhistleblowerPlatform.Client.Services
 @inject AuthService AuthService
+@inject AdminService AdminService
 @inject NavigationManager Navigation
 
 @code {
-    protected override void OnInitialized()
+    private AdminStatsDto? _stats;
+    private bool _statsLoading = true;
+
+    protected override async Task OnInitializedAsync()
     {
         if (AuthService.AccessToken == null || AuthService.Role != "Admin")
+        {
             Navigation.NavigateTo("/login");
+            return;
+        }
+        _stats = await AdminService.GetStatsAsync();
+        _statsLoading = false;
     }
 }
 
@@ -102,22 +111,31 @@
 
             <!-- Stats row -->
             <div class="row g-4 text-center mb-4">
-                <div class="col-6 col-md-3">
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">247</div>
-                    <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Total Reports</div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">58</div>
-                    <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Active Cases</div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">12</div>
-                    <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Investigators</div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">456</div>
-                    <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Files Sanitized</div>
-                </div>
+                @if (_statsLoading)
+                {
+                    <div class="col-12 text-center" style="color: var(--color-muted-fg); padding: 1rem 0;">
+                        <span class="spinner-border spinner-border-sm"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-6 col-md-3">
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">@(_stats?.TotalReports ?? 0)</div>
+                        <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Total Reports</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">@(_stats?.ActiveCases ?? 0)</div>
+                        <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Active Cases</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">@(_stats?.Investigators ?? 0)</div>
+                        <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Investigators</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); line-height: 1;">@(_stats?.FilesSanitized ?? 0)</div>
+                        <div style="font-size: 0.875rem; color: var(--color-muted-fg); margin-top: 0.4rem;">Files Sanitized</div>
+                    </div>
+                }
             </div>
 
             <!-- Info tiles row -->

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using UUIDNext;
 using WhistleblowerPlatform.Domain.Entities;
+using WhistleblowerPlatform.Domain.Enums;
 using WhistleblowerPlatform.Infrastructure.Persistence;
 
 namespace WhistleblowerPlatform.WebApi.Controllers;
@@ -258,6 +259,19 @@ public class AdminController : ControllerBase
         await WriteAuditLogAsync($"UpdateSetting:{key}", "PlatformSettings", key);
 
         return NoContent();
+    }
+
+    // ── US-4.x: Dashboard Stats ───────────────────────────────────────────────
+
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetStats()
+    {
+        var totalReports   = await _context.Reports.CountAsync();
+        var activeCases    = await _context.Reports.CountAsync(r => r.Status != ReportStatus.Closed);
+        var investigators  = await _context.Investigators.CountAsync(i => i.IsActive);
+        var filesSanitized = await _context.ReportAttachments.CountAsync(a => a.SanitizationStatus == SanitizationStatus.Completed);
+
+        return Ok(new { totalReports, activeCases, investigators, filesSanitized });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

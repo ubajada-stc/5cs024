@@ -115,6 +115,18 @@ public class AdminService
         return resp.IsSuccessStatusCode;
     }
 
+    // ── Dashboard Stats ───────────────────────────────────────────────────────
+
+    public async Task<AdminStatsDto?> GetStatsAsync()
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, "/api/admin/stats");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+        using var resp = await _http.SendAsync(req);
+        return resp.IsSuccessStatusCode
+            ? await resp.Content.ReadFromJsonAsync<AdminStatsDto>()
+            : null;
+    }
+
     // ── US-4.3: Audit Logs ────────────────────────────────────────────────────
 
     public async Task<AuditLogPage> GetAuditLogsAsync(byte? actorType, string? action, DateTime? from, DateTime? to, int page, int pageSize)
@@ -179,4 +191,12 @@ public class AuditLogItem
     public string? Detail { get; set; }
     public string? Ipaddress { get; set; }
     public DateTime Timestamp { get; set; }
+}
+
+public class AdminStatsDto
+{
+    public int TotalReports { get; set; }
+    public int ActiveCases { get; set; }
+    public int Investigators { get; set; }
+    public int FilesSanitized { get; set; }
 }

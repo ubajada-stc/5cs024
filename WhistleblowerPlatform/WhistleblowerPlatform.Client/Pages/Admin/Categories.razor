@@ -76,104 +76,149 @@
     }
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Report Categories</h3>
-    <button class="btn btn-primary btn-sm" @onclick="() => _showForm = !_showForm">
-        @(_showForm ? "Cancel" : "New Category")
-    </button>
-</div>
+<div class="hero-section">
+    <div style="max-width: 1100px; margin: 0 auto;">
 
-@if (_showForm)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <h6 class="card-title">Create Category</h6>
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <input type="text" class="form-control form-control-sm" placeholder="Name"
-                           @bind="_newName" @bind:event="oninput" disabled="@_saving" />
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control form-control-sm" placeholder="Description (optional)"
-                           @bind="_newDescription" @bind:event="oninput" disabled="@_saving" />
-                </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control form-control-sm" placeholder="Order"
-                           @bind="_newDisplayOrder" disabled="@_saving" />
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-success btn-sm w-100"
-                            @onclick="CreateCategory"
-                            disabled="@(_saving || string.IsNullOrWhiteSpace(_newName))">
-                        @(_saving ? "Saving..." : "Create")
-                    </button>
-                </div>
+        <!-- Header -->
+        <div class="d-flex align-items-start justify-content-between mb-5">
+            <div>
+                <h1>Report Categories</h1>
+                <p class="lead" style="margin: 0;">Configure the categories available to whistleblowers</p>
             </div>
-            @if (!string.IsNullOrEmpty(_formError))
+            <div class="d-flex gap-3 align-items-center">
+                <a href="admin/dashboard" class="btn btn-outline-secondary btn-sm" style="white-space: nowrap;">&larr; Back to Dashboard</a>
+                <button class="btn btn-primary btn-sm px-3" @onclick="() => _showForm = !_showForm">
+                    @(_showForm ? "Cancel" : "+ New Category")
+                </button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger mb-4">@_error</div>
+        }
+
+        <!-- New category form -->
+        @if (_showForm)
+        {
+            <div class="submit-form-card mb-4">
+                <div style="font-size: 0.8rem; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.25rem;">New Category</div>
+                <div class="row g-3">
+                    <div class="col-md-1">
+                        <label class="form-label" style="font-size: 0.85rem;">Order</label>
+                        <input type="number" class="form-control" @bind="_newDisplayOrder" disabled="@_saving" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size: 0.85rem;">Name</label>
+                        <input type="text" class="form-control" placeholder="Category name"
+                               @bind="_newName" @bind:event="oninput" disabled="@_saving" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size: 0.85rem;">Description <span style="color: var(--color-muted-fg); font-weight: 400;">(optional)</span></label>
+                        <input type="text" class="form-control" placeholder="Brief description"
+                               @bind="_newDescription" @bind:event="oninput" disabled="@_saving" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-submit w-100"
+                                @onclick="CreateCategory"
+                                disabled="@(_saving || string.IsNullOrWhiteSpace(_newName))">
+                            @if (_saving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            @(_saving ? "Saving..." : "Create")
+                        </button>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(_formError))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@_formError</div>
+                }
+            </div>
+        }
+
+        <!-- Table card -->
+        <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: 0 2rem 6rem rgba(0,0,0,0.08); overflow: hidden;">
+
+            @if (_loading)
             {
-                <div class="alert alert-danger mt-2 py-1">@_formError</div>
+                <div style="padding: 3rem; text-align: center; color: var(--color-muted-fg);">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                </div>
+            }
+            else
+            {
+                <div style="overflow-x: auto;">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr style="background-color: rgba(var(--color-primary-rgb), 0.04); border-bottom: 1px solid var(--color-border);">
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 5rem;">Order</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 16rem;">Name</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em;">Description</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 10rem;">Status</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 18rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cat in _categories)
+                            {
+                                <tr style="border-bottom: 1px solid var(--color-border);" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.02)'" onmouseout="this.style.backgroundColor=''">
+                                    @if (_editingId == cat.CategoryId)
+                                    {
+                                        <td style="padding: 0.75rem 1.5rem;">
+                                            <input type="number" class="form-control form-control-sm" @bind="_editDisplayOrder" style="width: 70px;" />
+                                        </td>
+                                        <td style="padding: 0.75rem 1.5rem;">
+                                            <input type="text" class="form-control form-control-sm" @bind="_editName" @bind:event="oninput" />
+                                        </td>
+                                        <td style="padding: 0.75rem 1.5rem;">
+                                            <input type="text" class="form-control form-control-sm" @bind="_editDescription" @bind:event="oninput" />
+                                        </td>
+                                        <td style="padding: 0.75rem 1.5rem;"></td>
+                                        <td style="padding: 0.75rem 1.5rem;">
+                                            <div class="d-flex gap-2">
+                                                <button style="padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-primary); color: #fff; font-size: 0.875rem; cursor: pointer;"
+                                                        @onclick="() => SaveEdit(cat.CategoryId)"
+                                                        disabled="@string.IsNullOrWhiteSpace(_editName)">Save</button>
+                                                <button style="padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: transparent; font-size: 0.875rem; cursor: pointer; color: var(--color-muted-fg);"
+                                                        @onclick="() => _editingId = null">Cancel</button>
+                                            </div>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--color-muted-fg);">@cat.DisplayOrder</td>
+                                        <td style="padding: 1rem 1.5rem; font-size: 0.875rem; font-weight: 500;">@cat.Name</td>
+                                        <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--color-muted-fg);">@cat.Description</td>
+                                        <td style="padding: 1rem 1.5rem;">
+                                            @if (cat.IsActive)
+                                            {
+                                                <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: var(--color-accent); color: var(--color-foreground); border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: var(--color-muted-bg); color: var(--color-muted-fg); border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Inactive</span>
+                                            }
+                                        </td>
+                                        <td style="padding: 1rem 1.5rem;">
+                                            <div class="d-flex gap-2">
+                                                <button style="padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: transparent; font-size: 0.875rem; cursor: pointer; color: var(--color-foreground);"
+                                                        @onclick="() => StartEdit(cat)">Edit</button>
+                                                @if (cat.IsActive)
+                                                {
+                                                    <button style="padding: 0.5rem 1.25rem; border: 1px solid rgba(229,62,62,0.3); border-radius: var(--radius); background: transparent; font-size: 0.875rem; cursor: pointer; color: var(--color-destructive);"
+                                                            @onclick="() => Deactivate(cat.CategoryId)">Deactivate</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
+
     </div>
-}
-
-@if (!string.IsNullOrEmpty(_error))
-{
-    <div class="alert alert-danger">@_error</div>
-}
-
-@if (_loading)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <table class="table table-sm table-hover">
-        <thead>
-            <tr>
-                <th>Order</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cat in _categories)
-            {
-                <tr>
-                    @if (_editingId == cat.CategoryId)
-                    {
-                        <td><input type="number" class="form-control form-control-sm" @bind="_editDisplayOrder" style="width:70px" /></td>
-                        <td><input type="text" class="form-control form-control-sm" @bind="_editName" @bind:event="oninput" /></td>
-                        <td><input type="text" class="form-control form-control-sm" @bind="_editDescription" @bind:event="oninput" /></td>
-                        <td></td>
-                        <td class="d-flex gap-1">
-                            <button class="btn btn-success btn-sm" @onclick="() => SaveEdit(cat.CategoryId)"
-                                    disabled="@string.IsNullOrWhiteSpace(_editName)">Save</button>
-                            <button class="btn btn-secondary btn-sm" @onclick="() => _editingId = null">Cancel</button>
-                        </td>
-                    }
-                    else
-                    {
-                        <td>@cat.DisplayOrder</td>
-                        <td>@cat.Name</td>
-                        <td>@cat.Description</td>
-                        <td>
-                            <span class="badge @(cat.IsActive ? "bg-success" : "bg-secondary")">
-                                @(cat.IsActive ? "Active" : "Inactive")
-                            </span>
-                        </td>
-                        <td class="d-flex gap-1">
-                            <button class="btn btn-outline-primary btn-sm" @onclick="() => StartEdit(cat)">Edit</button>
-                            @if (cat.IsActive)
-                            {
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => Deactivate(cat.CategoryId)">Deactivate</button>
-                            }
-                        </td>
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+</div>
