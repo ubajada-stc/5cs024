@@ -207,11 +207,16 @@
                         }
                     </div>
                 }
+                @if (_case!.Status == 4)
+                {
+                    <div class="info-panel mb-3">This case is closed. No further messages can be sent.</div>
+                }
                 <textarea class="form-control mb-2" rows="3" placeholder="Type your reply..."
-                          @bind="_replyText" @bind:event="oninput"></textarea>
+                          @bind="_replyText" @bind:event="oninput"
+                          disabled="@(_sendingReply || _case!.Status == 4)"></textarea>
                 <button class="btn btn-primary btn-sm"
                         @onclick="SendReply"
-                        disabled="@(_sendingReply || string.IsNullOrWhiteSpace(_replyText))">
+                        disabled="@(_sendingReply || string.IsNullOrWhiteSpace(_replyText) || _case!.Status == 4)">
                     @if (_sendingReply)
                     {
                         <span class="spinner-border spinner-border-sm me-1"></span>

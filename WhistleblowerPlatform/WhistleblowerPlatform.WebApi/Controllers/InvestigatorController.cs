@@ -323,6 +323,9 @@ public class InvestigatorController : ControllerBase
             .FirstOrDefaultAsync();
         if (report is null) return NotFound(new { error = "Case not found." });
 
+        if (report.Status == ReportStatus.Closed)
+            return Conflict(new { error = "Cannot send messages on a closed case." });
+
         var message = new Message
         {
             MessageId = Guid.NewGuid(),

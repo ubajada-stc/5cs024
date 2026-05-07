@@ -139,6 +139,9 @@ public class WhistleblowerController : ControllerBase
         if (report is null)
             return Unauthorized(new { error = "Invalid token." });
 
+        if (report.Status == ReportStatus.Closed)
+            return Conflict(new { error = "Cannot send messages on a closed case." });
+
         var message = new WhistleblowerPlatform.Domain.Entities.Message
         {
             MessageId = Guid.NewGuid(),
