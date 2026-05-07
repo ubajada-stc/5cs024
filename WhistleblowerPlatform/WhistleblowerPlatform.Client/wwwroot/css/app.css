@@ -167,6 +167,17 @@ a, .btn-link {
     align-items: center;
     gap: 0.4rem;
 }
+.admin-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: 1fr;
+    gap: 1.5rem;
+}
+@media (min-width: 992px) {
+    .admin-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 
 /* Hero section */
 .hero-section {

@@ -29,9 +29,8 @@
             <p class="lead" style="margin: 0;">System administration and platform management</p>
         </div>
 
-        <!-- Nav cards 2-column grid -->
-        <div class="row row-cols-1 row-cols-lg-2 g-4 mb-4">
-            <div class="col d-flex">
+        <!-- Nav cards 2-column grid (CSS Grid ensures all 5 cards are equal height) -->
+        <div class="admin-card-grid mb-4">
                 <a href="admin/investigators" class="portal-card d-flex flex-column">
                     <div class="portal-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -44,8 +43,6 @@
                     <p>Create, update, and deactivate investigator accounts.</p>
                     <div class="portal-card-link mt-auto">Manage Investigators <span>→</span></div>
                 </a>
-            </div>
-            <div class="col d-flex">
                 <a href="admin/categories" class="portal-card d-flex flex-column">
                     <div class="portal-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -61,8 +58,6 @@
                     <p>Configure the categories available to whistleblowers.</p>
                     <div class="portal-card-link mt-auto">Manage Categories <span>→</span></div>
                 </a>
-            </div>
-            <div class="col d-flex">
                 <a href="admin/audit-logs" class="portal-card d-flex flex-column">
                     <div class="portal-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -76,8 +71,6 @@
                     <p>View platform activity for compliance and security monitoring.</p>
                     <div class="portal-card-link mt-auto">View Audit Logs <span>→</span></div>
                 </a>
-            </div>
-            <div class="col d-flex">
                 <a href="admin/settings" class="portal-card d-flex flex-column">
                     <div class="portal-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -89,8 +82,6 @@
                     <p>Configure retention, deadlines, and platform options.</p>
                     <div class="portal-card-link mt-auto">Manage Settings <span>→</span></div>
                 </a>
-            </div>
-            <div class="col d-flex">
                 <a href="account/mfa" class="portal-card d-flex flex-column">
                     <div class="portal-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -102,7 +93,6 @@
                     <p>Enable or disable MFA on your administrator account.</p>
                     <div class="portal-card-link mt-auto">Manage MFA <span>→</span></div>
                 </a>
-            </div>
         </div>
 
         <!-- System Overview panel -->

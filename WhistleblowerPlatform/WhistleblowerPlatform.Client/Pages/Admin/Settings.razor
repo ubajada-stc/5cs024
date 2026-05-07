@@ -46,56 +46,79 @@
     }
 }
 
-<h3>Platform Settings</h3>
-<p class="text-muted">Changes take effect immediately or on the next background service cycle.</p>
+<div class="hero-section">
+    <div style="max-width: 900px; margin: 0 auto;">
 
-@if (!string.IsNullOrEmpty(_error))
-{
-    <div class="alert alert-danger">@_error</div>
-}
+        <!-- Header -->
+        <div class="d-flex align-items-start justify-content-between mb-5">
+            <div>
+                <h1>Platform Settings</h1>
+                <p class="lead" style="margin: 0;">Changes take effect immediately or on the next background service cycle</p>
+            </div>
+            <a href="admin/dashboard" class="btn btn-outline-secondary btn-sm" style="white-space: nowrap;">&larr; Back to Dashboard</a>
+        </div>
 
-@if (_loading)
-{
-    <p>Loading...</p>
-}
-else if (!_settings.Any())
-{
-    <div class="alert alert-warning">
-        No settings found. Run the seed script in <code>db/005_seed_platform_settings.sql</code> to populate defaults.
-    </div>
-}
-else
-{
-    <div class="row">
-        @foreach (var setting in _settings)
+        @if (!string.IsNullOrEmpty(_error))
         {
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-title">@setting.SettingKey</h6>
-                        @if (!string.IsNullOrEmpty(setting.Description))
-                        {
-                            <p class="card-text text-muted small">@setting.Description</p>
-                        }
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control"
-                                   value="@_editValues[setting.SettingKey]"
-                                   @oninput="e => _editValues[setting.SettingKey] = e.Value?.ToString() ?? string.Empty"
-                                   disabled="@_saving.Contains(setting.SettingKey)" />
-                            <button class="btn btn-primary"
-                                    @onclick="() => Save(setting.SettingKey)"
-                                    disabled="@_saving.Contains(setting.SettingKey)">
-                                @(_saving.Contains(setting.SettingKey) ? "Saving..." : "Save")
-                            </button>
-                        </div>
-                        @if (_saved.Contains(setting.SettingKey))
-                        {
-                            <div class="text-success small mt-1">Saved</div>
-                        }
-                        <div class="text-muted small mt-1">Last updated: @setting.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</div>
-                    </div>
-                </div>
+            <div class="alert alert-danger mb-4">@_error</div>
+        }
+
+        @if (_loading)
+        {
+            <div class="text-center" style="color: var(--color-muted-fg); padding: 3rem 0;">
+                <span class="spinner-border spinner-border-sm me-2"></span> Loading...
             </div>
         }
+        else if (!_settings.Any())
+        {
+            <div class="alert alert-warning">
+                No settings found. Run the seed script in <code>db/005_seed_platform_settings.sql</code> to populate defaults.
+            </div>
+        }
+        else
+        {
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                @foreach (var setting in _settings)
+                {
+                    <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 2rem 6rem rgba(0,0,0,0.08);">
+                        <div class="row g-4 align-items-start">
+                            <div class="col-md">
+                                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.6rem;">@setting.SettingKey</h3>
+                                @if (!string.IsNullOrEmpty(setting.Description))
+                                {
+                                    <p style="font-size: 0.9rem; color: var(--color-muted-fg); line-height: 1.7; margin-bottom: 0.6rem;">@setting.Description</p>
+                                }
+                                <p style="font-size: 0.8rem; color: var(--color-muted-fg); margin: 0;">
+                                    Last updated: @setting.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
+                                </p>
+                            </div>
+                            <div class="col-md-auto" style="min-width: 220px;">
+                                <input type="number" class="form-control mb-2"
+                                       value="@_editValues[setting.SettingKey]"
+                                       @oninput="e => _editValues[setting.SettingKey] = e.Value?.ToString() ?? string.Empty"
+                                       disabled="@_saving.Contains(setting.SettingKey)" />
+                                <button class="btn btn-primary w-100"
+                                        style="border-radius: var(--radius-lg);"
+                                        @onclick="() => Save(setting.SettingKey)"
+                                        disabled="@_saving.Contains(setting.SettingKey)">
+                                    @if (_saving.Contains(setting.SettingKey))
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    @(_saving.Contains(setting.SettingKey) ? "Saving..." : "Save")
+                                </button>
+                                @if (_saved.Contains(setting.SettingKey))
+                                {
+                                    <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.4rem; text-align: center;">
+                                        ✓ Saved
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
     </div>
-}
+</div>
