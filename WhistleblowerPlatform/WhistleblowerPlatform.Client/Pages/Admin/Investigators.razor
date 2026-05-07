@@ -59,91 +59,127 @@
     }
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Investigators</h3>
-    <button class="btn btn-primary btn-sm" @onclick="() => _showForm = !_showForm">
-        @(_showForm ? "Cancel" : "New Investigator")
-    </button>
-</div>
+<div class="hero-section">
+    <div style="max-width: 1100px; margin: 0 auto;">
 
-@if (_showForm)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <h6 class="card-title">Create Investigator</h6>
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="email" class="form-control form-control-sm" placeholder="Email"
-                           @bind="_newEmail" @bind:event="oninput" disabled="@_saving" />
-                </div>
-                <div class="col-md-4">
-                    <input type="password" class="form-control form-control-sm" placeholder="Password"
-                           @bind="_newPassword" @bind:event="oninput" disabled="@_saving" />
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-success btn-sm w-100"
-                            @onclick="CreateInvestigator"
-                            disabled="@(_saving || string.IsNullOrWhiteSpace(_newEmail) || string.IsNullOrWhiteSpace(_newPassword))">
-                        @(_saving ? "Saving..." : "Create")
-                    </button>
-                </div>
+        <!-- Header -->
+        <div class="d-flex align-items-start justify-content-between mb-5">
+            <div>
+                <h1>Investigators</h1>
+                <p class="lead" style="margin: 0;">Create, update, and deactivate investigator accounts</p>
             </div>
-            @if (!string.IsNullOrEmpty(_formError))
+            <div class="d-flex gap-3 align-items-center">
+                <a href="admin/dashboard" class="btn btn-outline-secondary btn-sm" style="white-space: nowrap;">&larr; Back to Dashboard</a>
+                <button class="btn btn-primary btn-sm px-3" @onclick="() => _showForm = !_showForm">
+                    @(_showForm ? "Cancel" : "+ New Investigator")
+                </button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger mb-4">@_error</div>
+        }
+
+        <!-- New investigator form -->
+        @if (_showForm)
+        {
+            <div class="submit-form-card mb-4">
+                <div style="font-size: 0.8rem; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.25rem;">New Investigator</div>
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label" style="font-size: 0.85rem;">Email</label>
+                        <input type="email" class="form-control" placeholder="investigator@example.com"
+                               @bind="_newEmail" @bind:event="oninput" disabled="@_saving" />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" style="font-size: 0.85rem;">Temporary Password</label>
+                        <input type="password" class="form-control" placeholder="Min. 12 characters"
+                               @bind="_newPassword" @bind:event="oninput" disabled="@_saving" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-submit w-100"
+                                @onclick="CreateInvestigator"
+                                disabled="@(_saving || string.IsNullOrWhiteSpace(_newEmail) || string.IsNullOrWhiteSpace(_newPassword))">
+                            @if (_saving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            @(_saving ? "Saving..." : "Create")
+                        </button>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(_formError))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@_formError</div>
+                }
+            </div>
+        }
+
+        <!-- Table card -->
+        <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: 0 2rem 6rem rgba(0,0,0,0.08); overflow: hidden;">
+
+            @if (_loading)
             {
-                <div class="alert alert-danger mt-2 py-1">@_formError</div>
+                <div style="padding: 3rem; text-align: center; color: var(--color-muted-fg);">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                </div>
+            }
+            else
+            {
+                <div style="overflow-x: auto;">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr style="background-color: rgba(var(--color-primary-rgb), 0.04); border-bottom: 1px solid var(--color-border);">
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em;">Email</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 10rem;">Status</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 10rem;">Keypair</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 10rem;">Created</th>
+                                <th style="padding: 1rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; width: 12rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var inv in _investigators)
+                            {
+                                <tr style="border-bottom: 1px solid var(--color-border);" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.02)'" onmouseout="this.style.backgroundColor=''">
+                                    <td style="padding: 1rem 1.5rem; font-size: 0.875rem;">@inv.Email</td>
+                                    <td style="padding: 1rem 1.5rem;">
+                                        @if (inv.IsActive)
+                                        {
+                                            <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: var(--color-accent); color: var(--color-foreground); border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: var(--color-muted-bg); color: var(--color-muted-fg); border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Inactive</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem 1.5rem;">
+                                        @if (inv.HasKeypair)
+                                        {
+                                            <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: #d1fae5; color: #065f46; border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Set up</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="display: inline-flex; padding: 0.35rem 0.85rem; background-color: #fef3c7; color: #92400e; border-radius: var(--radius); font-size: 0.8rem; font-weight: 500;">Pending</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--color-muted-fg);">@inv.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                    <td style="padding: 1rem 1.5rem;">
+                                        @if (inv.IsActive)
+                                        {
+                                            <button style="padding: 0.5rem 1.25rem; border: 1px solid rgba(229,62,62,0.3); border-radius: var(--radius); background: transparent; font-size: 0.875rem; cursor: pointer; color: var(--color-destructive);"
+                                                    @onclick="() => Deactivate(inv.InvestigatorId)">
+                                                Deactivate
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
+
     </div>
-}
-
-@if (!string.IsNullOrEmpty(_error))
-{
-    <div class="alert alert-danger">@_error</div>
-}
-
-@if (_loading)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <table class="table table-sm table-hover">
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Keypair</th>
-                <th>Created</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var inv in _investigators)
-            {
-                <tr>
-                    <td>@inv.Email</td>
-                    <td>
-                        <span class="badge @(inv.IsActive ? "bg-success" : "bg-secondary")">
-                            @(inv.IsActive ? "Active" : "Inactive")
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge @(inv.HasKeypair ? "bg-success" : "bg-warning text-dark")">
-                            @(inv.HasKeypair ? "Set up" : "Pending")
-                        </span>
-                    </td>
-                    <td>@inv.CreatedAt.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        @if (inv.IsActive)
-                        {
-                            <button class="btn btn-outline-danger btn-sm"
-                                    @onclick="() => Deactivate(inv.InvestigatorId)">
-                                Deactivate
-                            </button>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+</div>
